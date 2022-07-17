@@ -5,3 +5,4 @@ USER root
 RUN mkdir -p /data && chown airflow /data
 
 USER airflow
+ 

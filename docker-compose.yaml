@@ -35,7 +35,7 @@ services:
   
   init:
     build:
-      context: ./docker/airflow-pymongo
+      context: ./docker/airflow-data
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
     image: manning-airflow/airflow-data
@@ -47,7 +47,7 @@ services:
   
   webserver:
     build:
-      context: ./docker/airflow-pymongo
+      context: ./docker/airflow-data
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
     image: manning-airflow/airflow-data
@@ -66,7 +66,7 @@ services:
       context: ./docker/airflow-pymongo
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: manning-airflow/airflow-data
+    image: manning-airflow/airflow-pymongo
     restart: always
     depends_on:
       - postgres

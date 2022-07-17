@@ -191,5 +191,3 @@ fetch_krw_btc >> insert_krw_btc
 fetch_usdt_eth >> insert_usdt_eth
 fetch_krw_eth >> insert_krw_eth
 
-
-

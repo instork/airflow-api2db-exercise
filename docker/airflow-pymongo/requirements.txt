@@ -1,2 +1,3 @@
 pyupbit == 0.2.33 
 pymongo == 4.1.1
+python-dotenv == 0.20.0
