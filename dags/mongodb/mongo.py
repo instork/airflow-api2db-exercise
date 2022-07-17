@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv('/tmp/.env')
 
-def init_mongo_client():
+def _get_mongo_client():
     user = os.getenv("MONGODB_USER") 
     pwd = os.getenv("MONGODB_PWD") 
     host = os.getenv("MONGODB_HOST")

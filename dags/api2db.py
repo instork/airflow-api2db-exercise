@@ -1,14 +1,19 @@
-# TODO: https://github.com/astronomer/airflow-guide-passing-data-between-tasks
+# TODO: Better way to pass data between tasks
 # cf. https://www.astronomer.io/guides/airflow-passing-data-between-tasks
 # TODO: USE Mongo DB container or Package apache-airflow-providers-mongo
 # cf. https://airflow.apache.org/docs/apache-airflow-providers-mongo/stable/index.html
 # TODO: change python operator to bash operator, for dependency on database and etc.
 # ex. https://github.com/vineeths96/Data-Engineering-Nanodegree/blob/master/Project%206%20Capstone%20Project/airflow/dag.py
 
+# https://airflow.apache.org/docs/apache-airflow/stable/timezone.html
+# TODO: fix scheduling
+
+
 import os
 import json
 import logging
 import pyupbit
+import pendulum
 import datetime as dt
 from typing import Dict
 
@@ -18,7 +23,12 @@ from airflow.operators.python import PythonOperator
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
-load_dotenv('/tmp/.env')
+load_dotenv("/tmp/.env")
+
+SCHEDULE_INTERVAL = "*/10 * * * *"
+TIME_INTERVAL = "minute1"
+GET_CNT = 10
+KST = pendulum.timezone("Asia/Seoul")
 
 
 def _get_mongo_client():
@@ -47,6 +57,7 @@ def _strftime_ohlcvs(ohlcvs):
                             ohlcvs[k].values()))
     return ohlcvs
 
+
 def _dict_strptime(dict_keys):
     return [dt.datetime.strptime(dict_key, '%Y-%m-%d %H:%M:%S') for dict_key in dict_keys]
 
@@ -61,9 +72,9 @@ def _strptime_ohlcvs(ohlcvs):
 with DAG(
     dag_id="api2db",
     description="Get ohlcv data using pyupbit",
-    start_date=dt.datetime(2022, 7, 16),
-    end_date=dt.datetime(2022, 7, 19),
-    schedule_interval="@hourly",
+    start_date=dt.datetime(2022, 7, 18, 0, 0, tzinfo=KST),
+    end_date=dt.datetime(2022, 7, 19, tzinfo=KST),
+    schedule_interval=SCHEDULE_INTERVAL,
 ) as dag:
     def _fetch_ohlcvs(templates_dict, **kwargs):
         logger = logging.getLogger(__name__)
@@ -96,8 +107,8 @@ with DAG(
             "end_date": "{{next_ds}}",
             "output_path": "/data/python/usdt_btc/{{ds}}.json",
             "coin_ticker" : "USDT-BTC", # "KRW-BTC"
-            "time_interval" : "minute1",
-            "cnt" : 60
+            "time_interval" : TIME_INTERVAL,
+            "cnt" : GET_CNT
         },
     )
     fetch_krw_btc = PythonOperator(
@@ -108,8 +119,8 @@ with DAG(
             "end_date": "{{next_ds}}",
             "output_path": "/data/python/krw_btc/{{ds}}.json",
             "coin_ticker" : "KRW-BTC", # "KRW-BTC"
-            "time_interval" : "minute1",
-            "cnt" : 60
+            "time_interval" : TIME_INTERVAL,
+            "cnt" : GET_CNT
         },
     )
     fetch_usdt_eth = PythonOperator(
@@ -120,8 +131,8 @@ with DAG(
             "end_date": "{{next_ds}}",
             "output_path": "/data/python/usdt_eth/{{ds}}.json",
             "coin_ticker" : "USDT-ETH", # "KRW-BTC"
-            "time_interval" : "minute1",
-            "cnt" : 60
+            "time_interval" : TIME_INTERVAL,
+            "cnt" : GET_CNT
         },
     )
     fetch_krw_eth = PythonOperator(
@@ -132,8 +143,8 @@ with DAG(
             "end_date": "{{next_ds}}",
             "output_path": "/data/python/krw_eth/{{ds}}.json",
             "coin_ticker" : "KRW-ETH", # "KRW-BTC"
-            "time_interval" : "minute1",
-            "cnt" : 60
+            "time_interval" : TIME_INTERVAL,
+            "cnt" : GET_CNT
         },
     )
     
@@ -151,6 +162,8 @@ with DAG(
         ohlcvs = [dict(zip(ohlcvs,t)) for t in zip(*ohlcvs.values())]
         db = mongo_client.test_db
         db[collection_name].insert_many(ohlcvs)
+        # https://stackoverflow.com/questions/36939482/pymongo-create-index-only-if-it-does-not-exist
+        db[collection_name].create_index('time_idx')
         mongo_client.close()
 
     insert_usdt_btc = PythonOperator(
