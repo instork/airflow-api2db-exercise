@@ -3,13 +3,13 @@
 ## Prerequisites
 - install docker
 - install docker-compose
+- install mongodb
 
 - run docker-compose
 ```bash
 $ docker-compose up
 $ docker-compose up --build --remove-orphans --force-recreate
 ```
-
 
 - stop docker-compose
 ```bash
