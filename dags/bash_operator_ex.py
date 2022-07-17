@@ -34,7 +34,7 @@ task3 = BashOperator(
     bash_command='pwd',
     dag=dag)
 
-task4 = Python
+
 
 task1 >> task2
 task1 >> task3
