@@ -1,19 +1,3 @@
-from typing import Dict
-import datetime as dt
-
-import pyupbit
-import logging
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-
-# from custom import mongo
-import os
-import json
-from pymongo import MongoClient
-from dotenv import load_dotenv
-
-load_dotenv('/tmp/.env')
-
 # TODO: https://github.com/astronomer/airflow-guide-passing-data-between-tasks
 # cf. https://www.astronomer.io/guides/airflow-passing-data-between-tasks
 # TODO: USE Mongo DB container or Package apache-airflow-providers-mongo
@@ -21,8 +5,23 @@ load_dotenv('/tmp/.env')
 # TODO: change python operator to bash operator, for dependency on database and etc.
 # ex. https://github.com/vineeths96/Data-Engineering-Nanodegree/blob/master/Project%206%20Capstone%20Project/airflow/dag.py
 
+import os
+import json
+import logging
+import pyupbit
+import datetime as dt
+from typing import Dict
 
-def _init_mongo_client():
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+
+from pymongo import MongoClient
+from dotenv import load_dotenv
+
+load_dotenv('/tmp/.env')
+
+
+def _get_mongo_client():
     user = os.getenv("MONGODB_USER") 
     pwd = os.getenv("MONGODB_PWD") 
     host = os.getenv("MONGODB_HOST")
@@ -30,7 +29,6 @@ def _init_mongo_client():
     client = MongoClient(f'mongodb://{user}:{pwd}@{host}:{port}')
     return client
 
-mongo_client = _init_mongo_client()
 
 def _get_ohlcvs(ticker: str, interval: str, count: int) -> Dict:
     """Get ohlcv."""
@@ -140,6 +138,7 @@ with DAG(
     )
     
     def _insert_ohlcvs(templates_dict, **kwargs):
+        mongo_client = _get_mongo_client()
         file_path = templates_dict['input_path']
         collection_name = templates_dict['collection_name']
         with open(file_path, 'r') as file:
@@ -152,6 +151,7 @@ with DAG(
         ohlcvs = [dict(zip(ohlcvs,t)) for t in zip(*ohlcvs.values())]
         db = mongo_client.test_db
         db[collection_name].insert_many(ohlcvs)
+        mongo_client.close()
 
     insert_usdt_btc = PythonOperator(
         task_id="insert_usdt_btc",

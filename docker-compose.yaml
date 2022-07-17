@@ -1,4 +1,4 @@
-# Reference: https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml
+# Reference: https://github.com/K9Ns/data-pipelines-with-apache-airflow/blob/main/chapter08/docker-compose.yml
 # docker-copmose version
 # https://docs.docker.com/compose/compose-file/
 
@@ -76,7 +76,8 @@ services:
       - logs:/opt/airflow/logs
     environment: *airflow_environment
     command: scheduler
-
+    extra_hosts:
+      - 'mongoservice:172.17.0.1'
 volumes:
   data:
   logs:
