@@ -8,14 +8,19 @@
 # https://airflow.apache.org/docs/apache-airflow/stable/timezone.html
 # TODO: fix scheduling
 
+# Templates reference
+# - https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html#
+# - https://stackoverflow.com/questions/71915396/what-is-the-prefered-way-to-write-next-ds-on-an-airflow-template
+# MongoDB index
+# - https://stackoverflow.com/questions/36939482/pymongo-create-index-only-if-it-does-not-exist
 
 import os
 import json
 import logging
-import pyupbit
+import requests
 import pendulum
 import datetime as dt
-from typing import Dict
+from typing import Dict, List
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -26,10 +31,11 @@ from dotenv import load_dotenv
 load_dotenv("/tmp/.env")
 
 SCHEDULE_INTERVAL = "*/10 * * * *"
-TIME_INTERVAL = "minute1"
+MINUTE_INTERVAL = 1
 GET_CNT = 10
 KST = pendulum.timezone("Asia/Seoul")
-
+UTC_TIMEZONE = pendulum.timezone('UTC')
+FILE_BASE_DIR = "/data/upbit"
 
 def _get_mongo_client():
     user = os.getenv("MONGODB_USER") 
@@ -40,58 +46,51 @@ def _get_mongo_client():
     return client
 
 
-def _get_ohlcvs(ticker: str, interval: str, count: int) -> Dict:
-    """Get ohlcv."""
-    ohlcv = pyupbit.get_ohlcv(ticker, interval, count)
-    ohlcv = ohlcv.to_dict()
-    return ohlcv
+def _get_minutes_ohlcvs(interval: int, ticker: str, to: pendulum.datetime, count: int) -> List[Dict]:
+    """Get ohlcvs until datetime 'to'."""
+    to = UTC_TIMEZONE.convert(to).strftime('%Y-%m-%d %H:%M:%S')
+    url = f"https://api.upbit.com/v1/candles/minutes/{interval}?market={ticker}&to={to}&count={count}"
+    headers = {"Accept": "application/json"}
+    response = requests.get(url, headers=headers)
+    # Error happens randomly
+    # TODO: json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0) 
+    response = json.loads(response.text)
+    return response
 
 
-def _dict_strftime(dict_keys):
-    return [dict_key.strftime('%Y-%m-%d %H:%M:%S') for dict_key in dict_keys]
+def _json_strptime(json_dicts: List[Dict] , dict_keys: List[str]= ['candle_date_time_utc', 'candle_date_time_kst']):
+    for key in dict_keys:
+        for ohlcv in json_dicts:
+            ohlcv.update({key:dt.datetime.strptime(ohlcv[key], '%Y-%m-%dT%H:%M:%S')})
+    return json_dicts
 
 
-def _strftime_ohlcvs(ohlcvs):
-    for k in ohlcvs.keys():
-        ohlcvs[k] = dict(zip(_dict_strftime(ohlcvs[k].keys()), 
-                            ohlcvs[k].values()))
-    return ohlcvs
-
-
-def _dict_strptime(dict_keys):
-    return [dt.datetime.strptime(dict_key, '%Y-%m-%d %H:%M:%S') for dict_key in dict_keys]
-
-
-def _strptime_ohlcvs(ohlcvs):
-    for k in ohlcvs.keys():
-        ohlcvs[k] = dict(zip(_dict_strptime(ohlcvs[k].keys()), 
-                            ohlcvs[k].values()))
-    return ohlcvs
+def _ts_2_pendulum_datetime(start_time: str):
+    start_time = start_time.split('.')[0]
+    start_time = pendulum.from_format(start_time, 'YYYYMMDDTHHmmss')
+    return start_time
 
 
 with DAG(
     dag_id="api2db",
-    description="Get ohlcv data using pyupbit",
-    start_date=dt.datetime(2022, 7, 18, 0, 0, tzinfo=KST),
-    end_date=dt.datetime(2022, 7, 19, tzinfo=KST),
+    description="Get ohlcv data using upbit API",
+    start_date=dt.datetime(2022, 7, 18, 9, 0, tzinfo=KST),
+    end_date=dt.datetime(2022, 7, 23, 0, 0, tzinfo=KST),
     schedule_interval=SCHEDULE_INTERVAL,
 ) as dag:
     def _fetch_ohlcvs(templates_dict, **kwargs):
         logger = logging.getLogger(__name__)
-        start_date = templates_dict["start_date"]
-        end_date = templates_dict["end_date"]
-        output_path = templates_dict["output_path"]
+
+        start_time = templates_dict["start_time"] # "2022-07-18T07:43:15.165980+00:00"
+        datetime_start_time = _ts_2_pendulum_datetime(start_time)        
 
         coin_ticker = templates_dict["coin_ticker"]
-        time_interval = templates_dict["time_interval"]
-        cnt = templates_dict["cnt"]
+        output_path =  f"{FILE_BASE_DIR}/{coin_ticker}/{start_time}.json"
+        logger.info(f"Fetching ohlcvs til {start_time}")
 
-        logger.info(f"Fetching ratings for {start_date} to {end_date}")
-
-        ohlcvs = _get_ohlcvs(coin_ticker, time_interval, cnt)
-        ohlcvs = _strftime_ohlcvs(ohlcvs)
-        logger.info(f"Fetched {len(ohlcvs)} ratings")
-        logger.info(f"Writing ratings to {output_path}")
+        ohlcvs = _get_minutes_ohlcvs(MINUTE_INTERVAL, coin_ticker, datetime_start_time, GET_CNT)
+        logger.info(f"Fetched {len(ohlcvs)} ohlcvs")
+        logger.info(f"Writing ohlcvs to {output_path}")
 
         output_dir = os.path.dirname(output_path)
         os.makedirs(output_dir, exist_ok=True)
@@ -103,104 +102,69 @@ with DAG(
         task_id="fetch_usdt_btc",
         python_callable=_fetch_ohlcvs,
         templates_dict={
-            "start_date": "{{ds}}",
-            "end_date": "{{next_ds}}",
-            "output_path": "/data/python/usdt_btc/{{ds}}.json",
-            "coin_ticker" : "USDT-BTC", # "KRW-BTC"
-            "time_interval" : TIME_INTERVAL,
-            "cnt" : GET_CNT
+            "start_time": "{{ ts_nodash }}",
+            "end_time": "{{ data_interval_end | ts_nodash }}",
+            "coin_ticker" : "USDT-BTC"
         },
     )
     fetch_krw_btc = PythonOperator(
         task_id="fetch_krw_btc",
         python_callable=_fetch_ohlcvs,
         templates_dict={
-            "start_date": "{{ds}}",
-            "end_date": "{{next_ds}}",
-            "output_path": "/data/python/krw_btc/{{ds}}.json",
-            "coin_ticker" : "KRW-BTC", # "KRW-BTC"
-            "time_interval" : TIME_INTERVAL,
-            "cnt" : GET_CNT
+            "start_time": "{{ ts_nodash }}",
+            "end_time": "{{ data_interval_end | ts_nodash }}",
+            "coin_ticker" : "KRW-BTC"
         },
     )
     fetch_usdt_eth = PythonOperator(
         task_id="fetch_usdt_eth",
         python_callable=_fetch_ohlcvs,
         templates_dict={
-            "start_date": "{{ds}}",
-            "end_date": "{{next_ds}}",
-            "output_path": "/data/python/usdt_eth/{{ds}}.json",
-            "coin_ticker" : "USDT-ETH", # "KRW-BTC"
-            "time_interval" : TIME_INTERVAL,
-            "cnt" : GET_CNT
+            "start_time": "{{ ts_nodash }}",
+            "end_time": "{{ data_interval_end | ts_nodash }}",
+            "coin_ticker" : "USDT-ETH"
         },
     )
     fetch_krw_eth = PythonOperator(
         task_id="fetch_krw_eth",
         python_callable=_fetch_ohlcvs,
         templates_dict={
-            "start_date": "{{ds}}",
-            "end_date": "{{next_ds}}",
-            "output_path": "/data/python/krw_eth/{{ds}}.json",
-            "coin_ticker" : "KRW-ETH", # "KRW-BTC"
-            "time_interval" : TIME_INTERVAL,
-            "cnt" : GET_CNT
+            "start_time": "{{ ts_nodash }}",
+            "end_time": "{{ data_interval_end | ts_nodash }}",
+            "coin_ticker" : "KRW-ETH"
         },
     )
     
     def _insert_ohlcvs(templates_dict, **kwargs):
+        logger = logging.getLogger(__name__)
         mongo_client = _get_mongo_client()
-        file_path = templates_dict['input_path']
-        collection_name = templates_dict['collection_name']
-        with open(file_path, 'r') as file:
-            data = json.load(file)
+        
+        start_time = templates_dict['start_time']
+        
+        tickers = os.listdir(FILE_BASE_DIR)
+        for ticker in tickers:
+            file_path = f"{FILE_BASE_DIR}/{ticker}/{start_time}.json"
+            
+            with open(file_path, 'r') as file:
+                json_dicts = json.load(file)
+            
+            logger.info(f"="*100)
+            logger.info(f"{type(json_dicts)}")
+            logger.info(f"{json_dicts}")
+            logger.info(f"="*100)
 
-        ohlcvs = _strptime_ohlcvs(data)
-        time_idx = ohlcvs[list(ohlcvs.keys())[0]].keys()
-        ohlcvs = {k:list(v.values()) for k,v in ohlcvs.items()}
-        ohlcvs.update(time_idx=time_idx)
-        ohlcvs = [dict(zip(ohlcvs,t)) for t in zip(*ohlcvs.values())]
-        db = mongo_client.test_db
-        db[collection_name].insert_many(ohlcvs)
-        # https://stackoverflow.com/questions/36939482/pymongo-create-index-only-if-it-does-not-exist
-        db[collection_name].create_index('time_idx')
+            json_dicts = _json_strptime(json_dicts)
+            db = mongo_client.test_db
+            db[ticker].insert_many(json_dicts)
+            db[ticker].create_index('candle_date_time_kst')
         mongo_client.close()
 
-    insert_usdt_btc = PythonOperator(
-        task_id="insert_usdt_btc",
+    insert_jsons = PythonOperator(
+        task_id="insert_jsons",
         python_callable=_insert_ohlcvs,
         templates_dict={
-            "input_path": "/data/python/usdt_btc/{{ds}}.json",
-            "collection_name": "usdt_btc"
-        }
-    )
-    insert_krw_btc = PythonOperator(
-        task_id="insert_krw_btc",
-        python_callable=_insert_ohlcvs,
-        templates_dict={
-            "input_path": "/data/python/krw_btc/{{ds}}.json",
-            "collection_name": "krw_btc"
-        }
-    )
-    insert_usdt_eth = PythonOperator(
-        task_id="insert_usdt_eth",
-        python_callable=_insert_ohlcvs,
-        templates_dict={
-            "input_path": "/data/python/usdt_eth/{{ds}}.json",
-            "collection_name": "usdt_eth"
-        }
-    )
-    insert_krw_eth = PythonOperator(
-        task_id="insert_krw_eth",
-        python_callable=_insert_ohlcvs,
-        templates_dict={
-            "input_path": "/data/python/krw_eth/{{ds}}.json",
-            "collection_name": "krw_eth"
+            "start_time": "{{ ts_nodash }}",
         }
     )
 
-fetch_usdt_btc >> insert_usdt_btc
-fetch_krw_btc >> insert_krw_btc
-fetch_usdt_eth >> insert_usdt_eth
-fetch_krw_eth >> insert_krw_eth
-
+[fetch_usdt_btc, fetch_krw_btc, fetch_usdt_eth, fetch_krw_eth] >> insert_jsons

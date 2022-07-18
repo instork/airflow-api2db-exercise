@@ -23,3 +23,13 @@ $ docker-compose up --build --remove-orphans --force-recreate
 $ docker-compose down
 $ docker-compose down --volumes --remove-orphans
 ```
+
+## MongoDB Basics
+```bash
+$ mongo -u <username> -p <password>
+$ show dbs
+$ use <db name>
+$ show collections
+$ db["<collection name>"].find()
+$ db.dropDatabase()
+```
