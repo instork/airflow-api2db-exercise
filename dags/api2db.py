@@ -16,6 +16,7 @@
 
 import os
 import json
+import time
 import logging
 import requests
 import pendulum
@@ -46,14 +47,14 @@ def _get_mongo_client():
     return client
 
 
-def _get_minutes_ohlcvs(interval: int, ticker: str, to: pendulum.datetime, count: int) -> List[Dict]:
+def _get_minutes_ohlcvs(interval: int, ticker: str, to: pendulum.datetime, count: int, 
+                        req_time_interval: float = 0, logger: logging.RootLogger = None ) -> List[Dict]:
     """Get ohlcvs until datetime 'to'."""
     to = UTC_TIMEZONE.convert(to).strftime('%Y-%m-%d %H:%M:%S')
     url = f"https://api.upbit.com/v1/candles/minutes/{interval}?market={ticker}&to={to}&count={count}"
     headers = {"Accept": "application/json"}
+    time.sleep(req_time_interval)
     response = requests.get(url, headers=headers)
-    # Error happens randomly
-    # TODO: json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0) 
     response = json.loads(response.text)
     return response
 
@@ -74,7 +75,7 @@ def _ts_2_pendulum_datetime(start_time: str):
 with DAG(
     dag_id="api2db",
     description="Get ohlcv data using upbit API",
-    start_date=dt.datetime(2022, 7, 18, 9, 0, tzinfo=KST),
+    start_date=dt.datetime(2022, 7, 19, 9, 0, tzinfo=KST),
     end_date=dt.datetime(2022, 7, 23, 0, 0, tzinfo=KST),
     schedule_interval=SCHEDULE_INTERVAL,
 ) as dag:
@@ -82,13 +83,14 @@ with DAG(
         logger = logging.getLogger(__name__)
 
         start_time = templates_dict["start_time"] # "2022-07-18T07:43:15.165980+00:00"
+        req_time_interval = templates_dict["req_time_interval"]
         datetime_start_time = _ts_2_pendulum_datetime(start_time)        
 
         coin_ticker = templates_dict["coin_ticker"]
         output_path =  f"{FILE_BASE_DIR}/{coin_ticker}/{start_time}.json"
         logger.info(f"Fetching ohlcvs til {start_time}")
 
-        ohlcvs = _get_minutes_ohlcvs(MINUTE_INTERVAL, coin_ticker, datetime_start_time, GET_CNT)
+        ohlcvs = _get_minutes_ohlcvs(MINUTE_INTERVAL, coin_ticker, datetime_start_time, GET_CNT, req_time_interval, logger)
         logger.info(f"Fetched {len(ohlcvs)} ohlcvs")
         logger.info(f"Writing ohlcvs to {output_path}")
 
@@ -104,7 +106,8 @@ with DAG(
         templates_dict={
             "start_time": "{{ ts_nodash }}",
             "end_time": "{{ data_interval_end | ts_nodash }}",
-            "coin_ticker" : "USDT-BTC"
+            "coin_ticker" : "USDT-BTC",
+            "req_time_interval": 1.0
         },
     )
     fetch_krw_btc = PythonOperator(
@@ -113,7 +116,8 @@ with DAG(
         templates_dict={
             "start_time": "{{ ts_nodash }}",
             "end_time": "{{ data_interval_end | ts_nodash }}",
-            "coin_ticker" : "KRW-BTC"
+            "coin_ticker" : "KRW-BTC",
+            "req_time_interval": 2.0
         },
     )
     fetch_usdt_eth = PythonOperator(
@@ -122,7 +126,8 @@ with DAG(
         templates_dict={
             "start_time": "{{ ts_nodash }}",
             "end_time": "{{ data_interval_end | ts_nodash }}",
-            "coin_ticker" : "USDT-ETH"
+            "coin_ticker" : "USDT-ETH",
+            "req_time_interval": 3.0
         },
     )
     fetch_krw_eth = PythonOperator(
@@ -131,7 +136,8 @@ with DAG(
         templates_dict={
             "start_time": "{{ ts_nodash }}",
             "end_time": "{{ data_interval_end | ts_nodash }}",
-            "coin_ticker" : "KRW-ETH"
+            "coin_ticker" : "KRW-ETH",
+            "req_time_interval": 4.0
         },
     )
     
@@ -147,11 +153,6 @@ with DAG(
             
             with open(file_path, 'r') as file:
                 json_dicts = json.load(file)
-            
-            logger.info(f"="*100)
-            logger.info(f"{type(json_dicts)}")
-            logger.info(f"{json_dicts}")
-            logger.info(f"="*100)
 
             json_dicts = _json_strptime(json_dicts)
             db = mongo_client.test_db
@@ -168,3 +169,8 @@ with DAG(
     )
 
 [fetch_usdt_btc, fetch_krw_btc, fetch_usdt_eth, fetch_krw_eth] >> insert_jsons
+
+# logger.info(f"="*100)
+# logger.info(f"{type(json_dicts)}")
+# logger.info(f"{json_dicts}")
+# logger.info(f"="*100)
