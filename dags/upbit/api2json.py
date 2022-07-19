@@ -1,3 +1,4 @@
+import argparse
 import json
 import logging
 import os
@@ -8,6 +9,35 @@ import pendulum
 import requests
 from airflow.decorators import task
 from utils.timeutils import ts_2_pendulum_datetime
+
+def get_params():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--minute_interval",
+        type=int,
+    )
+    parser.add_argument(
+        "--get_cnt",
+        type=int,
+    )
+    parser.add_argument(
+        "--start_time",
+        type=str,
+    )
+    parser.add_argument(
+        "--file_base_dir",
+        type=str,
+    )
+    parser.add_argument(
+        "--coin_ticker",
+        type=str,
+    )
+    parser.add_argument(
+        "--req_time_interval",
+        type=float,
+    )
+    args = parser.parse_args()
+    return args
 
 
 def _get_minutes_ohlcvs(
@@ -29,8 +59,7 @@ def _get_minutes_ohlcvs(
     return response
 
 
-@task
-def fetch_ohlcvs(templates_dict, **kwarg):
+def _fetch_ohlcvs(templates_dict, **kwarg):
     """Get ohlcvs and save."""
     logger = logging.getLogger(__name__)
     start_time = templates_dict["start_time"]  # "2022-07-18T07:43:15.165980+00:00"
@@ -62,3 +91,10 @@ def fetch_ohlcvs(templates_dict, **kwarg):
 
     with open(output_path, "w") as file_:
         json.dump(ohlcvs, fp=file_)
+
+def main(args):
+    _fetch_ohlcvs(args)
+
+if __name__ == "__main__":
+    args = get_params()
+    main(args)
