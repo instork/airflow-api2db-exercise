@@ -6,9 +6,8 @@ from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python import PythonOperator
 from dotenv import load_dotenv
-from pymongo import MongoClient
-
 from mongodb.json2mongo import insert_ohlcvs
+from pymongo import MongoClient
 from upbit.api2json import fetch_ohlcvs
 
 load_dotenv("/tmp/.env")
@@ -29,13 +28,13 @@ fetch_base_template_dict = {
     "file_base_dir": FILE_BASE_DIR,
 }
 tickers = ["USDT-BTC", "KRW-BTC", "USDT-ETH", "KRW-ETH"]
-req_time_intervals = [float(i) + 1 for i in range(len(tickers))]
+req_time_intervals = [float(i + 1) for i in range(len(tickers))]
 fetch_template_dicts = {}
 for ticker, req_time_interval in zip(tickers, req_time_intervals):
     fetch_base_template_dict.update(
         coin_ticker=ticker, req_time_interval=req_time_interval
     )
-    fetch_template_dicts[ticker] = fetch_base_template_dict
+    fetch_template_dicts[ticker] = fetch_base_template_dict.copy()
 
 
 with DAG(

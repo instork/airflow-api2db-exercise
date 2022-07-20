@@ -20,7 +20,6 @@ def _get_mongo_client():
     return client
 
 
-# @task
 def insert_ohlcvs(templates_dict, **kwargs):
     logger = logging.getLogger(__name__)
 
@@ -40,4 +39,5 @@ def insert_ohlcvs(templates_dict, **kwargs):
         db = mongo_client.test_db
         db[ticker].insert_many(json_dicts)
         db[ticker].create_index("candle_date_time_kst")
+
     mongo_client.close()
