@@ -1,26 +1,14 @@
 import json
 import logging
-import argparse
 import os
 
+from airflow.decorators import task
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from utils.timeutils import json_strptime
 
 load_dotenv("/tmp/.env")
 
-def get_params():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--start_time",
-        type=str,
-    )
-    parser.add_argument(
-        "--file_base_dir",
-        type=str,
-    )
-    args = parser.parse_args()
-    return args
 
 def _get_mongo_client():
     """Get mongo client."""
@@ -32,11 +20,11 @@ def _get_mongo_client():
     return client
 
 
-def _insert_ohlcvs(args):
+def insert_ohlcvs(templates_dict, **kwargs):
     logger = logging.getLogger(__name__)
 
-    file_base_dir = args.file_base_dir
-    start_time = args.start_time
+    file_base_dir = templates_dict["file_base_dir"]
+    start_time = templates_dict["start_time"]
     tickers = os.listdir(file_base_dir)
 
     mongo_client = _get_mongo_client()
@@ -51,13 +39,5 @@ def _insert_ohlcvs(args):
         db = mongo_client.test_db
         db[ticker].insert_many(json_dicts)
         db[ticker].create_index("candle_date_time_kst")
+
     mongo_client.close()
-
-
-def main(args):
-    _insert_ohlcvs(args)
-
-
-if __name__ == "__main__":
-    args = get_params()
-    main(args)
