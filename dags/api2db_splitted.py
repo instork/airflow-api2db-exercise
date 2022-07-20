@@ -2,7 +2,7 @@ import datetime as dt
 from typing import Dict, List
 
 import pendulum
-from airflow import DAG
+from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python import PythonOperator
 from dotenv import load_dotenv
@@ -36,44 +36,57 @@ for ticker, req_time_interval in zip(tickers, req_time_intervals):
     )
     fetch_template_dicts[ticker] = fetch_base_template_dict.copy()
 
-
+dag = None
 with DAG(
     dag_id="api2db_splitted",
     description="Get ohlcv data using upbit API",
-    start_date=dt.datetime(2022, 7, 19, 16, 0, tzinfo=KST),
+    start_date=dt.datetime(2022, 7, 20, 0, 0, tzinfo=KST),
     end_date=dt.datetime(2022, 7, 23, 0, 0, tzinfo=KST),
     schedule_interval=SCHEDULE_INTERVAL,
-) as dag:
+):
 
-    fetch_usdt_btc = PythonOperator(
+    fetch_cmd = "python /home/airflow/airflow/dags/upbit/api2json.py \
+                --minute_interval params.minute_interval \
+                --get_cnt params.get_cnt \
+                --start_time params.start_time \
+                --file_base_dir params.file_base_dir \
+                --coin_ticker params.coin_ticker \
+                --req_time_interval params.req_time_interval"
+
+    fetch_usdt_btc = BashOperator(
         task_id="fetch_usdt_btc",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["USDT-BTC"],
+        bash_command=fetch_cmd,
+        params=fetch_template_dicts["USDT-BTC"],
+        dag = dag
     )
-    fetch_krw_btc = PythonOperator(
+    fetch_krw_btc = BashOperator(
         task_id="fetch_krw_btc",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["KRW-BTC"],
+        bash_command=fetch_cmd,
+        params=fetch_template_dicts["KRW-BTC"],
+        dag = dag
     )
-    fetch_usdt_eth = PythonOperator(
+    fetch_usdt_eth = BashOperator(
         task_id="fetch_usdt_eth",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["USDT-ETH"],
+        bash_command=fetch_cmd,
+        params=fetch_template_dicts["USDT-ETH"],
+        dag = dag
     )
-    fetch_krw_eth = PythonOperator(
+    fetch_krw_eth = BashOperator(
         task_id="fetch_krw_eth",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["KRW-ETH"],
+        bash_command=fetch_cmd,
+        params=fetch_template_dicts["KRW-ETH"],
+        dag = dag
     )
 
-    insert_jsons = PythonOperator(
+    insert_jsons = BashOperator(
         task_id="insert_jsons",
-        python_callable=insert_ohlcvs,
-        templates_dict={
-            "start_time": "{{ ts_nodash }}",
+        bash_command="python mongodb/json2mongo.py --start_time {{ ts_nodash }} --file_base_dir {{ params.file_base_dir }} ",
+        params = {
             "file_base_dir": FILE_BASE_DIR,
         },
+        dag = dag
     )
+
 
 [fetch_usdt_btc, fetch_krw_btc, fetch_usdt_eth, fetch_krw_eth] >> insert_jsons
 
