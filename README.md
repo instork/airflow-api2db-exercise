@@ -17,6 +17,7 @@
 ```bash
 $ docker-compose up
 $ docker-compose up --build --remove-orphans --force-recreate
+$ docker-compose up --build --remove-orphans --force-recreate --detach
 ```
 
 - stop docker-compose

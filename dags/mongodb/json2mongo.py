@@ -20,7 +20,7 @@ def _get_mongo_client():
     return client
 
 
-@task
+# @task
 def insert_ohlcvs(templates_dict, **kwargs):
     logger = logging.getLogger(__name__)
 

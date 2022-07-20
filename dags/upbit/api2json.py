@@ -25,11 +25,15 @@ def _get_minutes_ohlcvs(
     headers = {"Accept": "application/json"}
     time.sleep(req_time_interval)
     response = requests.get(url, headers=headers)
+    logger.info(f"=" * 100)
+    logger.info(f"{type(response)}")
+    logger.info(f"{response.text}")
+    logger.info(f"=" * 100)
     response = json.loads(response.text)
     return response
 
 
-@task
+# @task
 def fetch_ohlcvs(templates_dict, **kwarg):
     """Get ohlcvs and save."""
     logger = logging.getLogger(__name__)
