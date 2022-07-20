@@ -67,8 +67,10 @@ def _get_minutes_ohlcvs(
 
 def _json_strptime(
     json_dicts: List[Dict],
-    dict_keys: List[str] = ["candle_date_time_utc", "candle_date_time_kst"],
+    dict_keys: List[str] = None,
 ):
+    if dict_keys is None:
+        dict_keys = ["candle_date_time_utc", "candle_date_time_kst"]
     for key in dict_keys:
         for ohlcv in json_dicts:
             ohlcv.update({key: dt.datetime.strptime(ohlcv[key], "%Y-%m-%dT%H:%M:%S")})
@@ -84,7 +86,7 @@ def _ts_2_pendulum_datetime(start_time: str):
 with DAG(
     dag_id="api2db",
     description="Get ohlcv data using upbit API",
-    start_date=dt.datetime(2022, 7, 19, 9, 0, tzinfo=KST),
+    start_date=dt.datetime(2022, 7, 20, 10, 0, tzinfo=KST),
     end_date=dt.datetime(2022, 7, 23, 0, 0, tzinfo=KST),
     schedule_interval=SCHEDULE_INTERVAL,
 ) as dag:
@@ -92,7 +94,7 @@ with DAG(
     def _fetch_ohlcvs(templates_dict, **kwargs):
         logger = logging.getLogger(__name__)
 
-        start_time = templates_dict["start_time"]  # "2022-07-18T07:43:15.165980+00:00"
+        start_time = templates_dict["start_time"]      # "2022-07-18T07:43:15.165980+00:00"
         req_time_interval = templates_dict["req_time_interval"]
         datetime_start_time = _ts_2_pendulum_datetime(start_time)
 

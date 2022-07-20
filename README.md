@@ -3,7 +3,6 @@
 ## Prerequisites
 - install docker
 - install docker-compose
-- install mongodb
 
 ## Prerequisites for MongoDB
 - Make mongodb user
@@ -24,14 +23,4 @@ $ docker-compose up --build --remove-orphans --force-recreate --detach
 ```bash
 $ docker-compose down
 $ docker-compose down --volumes --remove-orphans
-```
-
-## MongoDB Basics
-```bash
-$ mongo -u <username> -p <password>
-$ show dbs
-$ use <db name>
-$ show collections
-$ db["<collection name>"].find()
-$ db.dropDatabase()
 ```
