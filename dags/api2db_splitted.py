@@ -84,7 +84,7 @@ insert_jsons = BashOperator(
     params = {
         "file_base_dir": FILE_BASE_DIR,
     },
-    dag = dag
+    dag=dag
 )
 
 

@@ -77,9 +77,23 @@ services:
       - logs:/opt/airflow/logs
     environment: *airflow_environment
     command: scheduler
-    extra_hosts:
-      - 'mongoservice:172.17.0.1'
-      
+#    extra_hosts:
+#      - 'mongoservice:172.17.0.1'
+
+  mongodb:
+    hostname: mongoservice
+    container_name: mongodb
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=airflow
+      - MONGO_INITDB_ROOT_PASSWORD=airflow
+      - MONGO_INITDB_DATABASE=mydb
+
 volumes:
   data:
   logs:
