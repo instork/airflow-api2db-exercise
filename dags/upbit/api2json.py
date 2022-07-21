@@ -29,7 +29,7 @@ def _get_minutes_ohlcvs(
     return response
 
 
-def fetch_ohlcvs(templates_dict, **kwarg):
+def fetch_ohlcvs(templates_dict, **context):
     """Get ohlcvs and save."""
     logger = logging.getLogger(__name__)
     start_time = templates_dict["start_time"]  # "2022-07-18T07:43:15.165980+00:00"
@@ -52,15 +52,16 @@ def fetch_ohlcvs(templates_dict, **kwarg):
         req_time_interval,
         logger,
     )
+    return ohlcvs
 
-    logger.info(f"Fetched {len(ohlcvs)} ohlcvs")
-    logger.info(f"Writing ohlcvs to {output_path}")
+    # logger.info(f"Fetched {len(ohlcvs)} ohlcvs")
+    # logger.info(f"Writing ohlcvs to {output_path}")
 
-    output_dir = os.path.dirname(output_path)
-    os.makedirs(output_dir, exist_ok=True)
+    # output_dir = os.path.dirname(output_path)
+    # os.makedirs(output_dir, exist_ok=True)
 
-    with open(output_path, "w") as file_:
-        json.dump(ohlcvs, fp=file_)
+    # with open(output_path, "w") as file_:
+    #     json.dump(ohlcvs, fp=file_)
 
 
 # logger.info(f"=" * 100)

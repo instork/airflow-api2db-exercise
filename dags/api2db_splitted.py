@@ -36,46 +36,47 @@ for ticker, req_time_interval in zip(tickers, req_time_intervals):
     )
     fetch_template_dicts[ticker] = fetch_base_template_dict.copy()
 
-
-with DAG(
+dag = DAG(
     dag_id="api2db_splitted",
     description="Get ohlcv data using upbit API",
     start_date=dt.datetime(2022, 7, 19, 16, 0, tzinfo=KST),
     end_date=dt.datetime(2022, 7, 23, 0, 0, tzinfo=KST),
     schedule_interval=SCHEDULE_INTERVAL,
-) as dag:
+)
 
-    fetch_usdt_btc = PythonOperator(
-        task_id="fetch_usdt_btc",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["USDT-BTC"],
-    )
-    fetch_krw_btc = PythonOperator(
-        task_id="fetch_krw_btc",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["KRW-BTC"],
-    )
-    fetch_usdt_eth = PythonOperator(
-        task_id="fetch_usdt_eth",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["USDT-ETH"],
-    )
-    fetch_krw_eth = PythonOperator(
-        task_id="fetch_krw_eth",
-        python_callable=fetch_ohlcvs,
-        templates_dict=fetch_template_dicts["KRW-ETH"],
-    )
+fetch_usdt_btc = PythonOperator(
+    task_id="fetch_usdt_btc",
+    python_callable=fetch_ohlcvs,
+    templates_dict=fetch_template_dicts["USDT-BTC"],
+    dag=dag,
+)
+fetch_krw_btc = PythonOperator(
+    task_id="fetch_krw_btc",
+    python_callable=fetch_ohlcvs,
+    templates_dict=fetch_template_dicts["KRW-BTC"],
+    dag=dag,
+)
+fetch_usdt_eth = PythonOperator(
+    task_id="fetch_usdt_eth",
+    python_callable=fetch_ohlcvs,
+    templates_dict=fetch_template_dicts["USDT-ETH"],
+    dag=dag,
+)
+fetch_krw_eth = PythonOperator(
+    task_id="fetch_krw_eth",
+    python_callable=fetch_ohlcvs,
+    templates_dict=fetch_template_dicts["KRW-ETH"],
+    dag=dag,
+)
 
-    insert_jsons = PythonOperator(
-        task_id="insert_jsons",
-        python_callable=insert_ohlcvs,
-        templates_dict={
-            "start_time": "{{ ts_nodash }}",
-            "file_base_dir": FILE_BASE_DIR,
-        },
-    )
+insert_jsons = PythonOperator(
+    task_id="insert_jsons", python_callable=insert_ohlcvs, dag=dag
+)
 
-[fetch_usdt_btc, fetch_krw_btc, fetch_usdt_eth, fetch_krw_eth] >> insert_jsons
+fetch_usdt_btc >> insert_jsons
+fetch_krw_btc >> insert_jsons
+fetch_usdt_eth >> insert_jsons
+fetch_krw_eth >> insert_jsons
 
 # logger.info(f"="*100)
 # logger.info(f"{type(json_dicts)}")

@@ -20,24 +20,17 @@ def _get_mongo_client():
     return client
 
 
-def insert_ohlcvs(templates_dict, **kwargs):
+def insert_ohlcvs(**context):
     logger = logging.getLogger(__name__)
-
-    file_base_dir = templates_dict["file_base_dir"]
-    start_time = templates_dict["start_time"]
-    tickers = os.listdir(file_base_dir)
+    prev_task_id = next(iter(context["task"].upstream_task_ids))
 
     mongo_client = _get_mongo_client()
 
-    for ticker in tickers:
-        file_path = f"{file_base_dir}/{ticker}/{start_time}.json"
-
-        with open(file_path, "r") as file:
-            json_dicts = json.load(file)
-
-        json_dicts = json_strptime(json_dicts)
-        db = mongo_client.test_db
-        db[ticker].insert_many(json_dicts)
-        db[ticker].create_index("candle_date_time_kst")
+    json_dicts = context["task_instance"].xcom_pull(task_ids=prev_task_id)
+    json_dicts = json_strptime(json_dicts)
+    ticker = json_dicts[0]["market"]
+    db = mongo_client.test_db
+    db[ticker].insert_many(json_dicts)
+    db[ticker].create_index("candle_date_time_kst")
 
     mongo_client.close()
