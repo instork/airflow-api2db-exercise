@@ -94,7 +94,7 @@ with DAG(
     def _fetch_ohlcvs(templates_dict, **kwargs):
         logger = logging.getLogger(__name__)
 
-        start_time = templates_dict["start_time"]      # "2022-07-18T07:43:15.165980+00:00"
+        start_time = templates_dict["start_time"]  # "2022-07-18T07:43:15.165980+00:00"
         req_time_interval = templates_dict["req_time_interval"]
         datetime_start_time = _ts_2_pendulum_datetime(start_time)
 
