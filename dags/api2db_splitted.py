@@ -12,7 +12,7 @@ from upbit.api2json import fetch_ohlcvs
 
 load_dotenv("/tmp/.env")
 
-# Set Configs
+#################### Set Configs ####################
 KST = pendulum.timezone("Asia/Seoul")
 SCHEDULE_INTERVAL = "*/10 * * * *"
 MINUTE_INTERVAL = 1
@@ -35,6 +35,7 @@ for ticker, req_time_interval in zip(tickers, req_time_intervals):
         coin_ticker=ticker, req_time_interval=req_time_interval
     )
     fetch_template_dicts[ticker] = fetch_base_template_dict.copy()
+##################################################
 
 dag = DAG(
     dag_id="api2db_splitted",

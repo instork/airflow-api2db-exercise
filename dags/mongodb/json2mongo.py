@@ -29,8 +29,15 @@ def insert_ohlcvs(**context):
     json_dicts = context["task_instance"].xcom_pull(task_ids=prev_task_id)
     json_dicts = json_strptime(json_dicts)
     ticker = json_dicts[0]["market"]
+
+    # Get database
     db = mongo_client.test_db
+
+    # Make collection
+    if ticker not in db.list_collection_names():
+        db.create_collection(ticker)
+        db[ticker].create_index([("candle_date_time_kst", 1)], unique=True)
+
     db[ticker].insert_many(json_dicts)
-    db[ticker].create_index("candle_date_time_kst")
 
     mongo_client.close()
