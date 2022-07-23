@@ -9,9 +9,14 @@ from utils.timeutils import ETZ
 
 ########################### Set Configs ###########################
 SCHEDULE_INTERVAL = "0 * * * *"  # every hour
+## mongodb
+mongo_templates_dict = {
+    "db_name": "test_db",
+    "start_time": "{{ ts_nodash }}"
+}
+## upbit
 MINUTE_INTERVAL = 60
 GET_CNT = 1
-
 fetch_base_template_dict = {
     "minute_interval": MINUTE_INTERVAL,
     "get_cnt": GET_CNT,
@@ -19,7 +24,6 @@ fetch_base_template_dict = {
 }
 tickers = ["USDT-BTC", "USDT-ETH"]
 req_time_intervals = [float(i + 1) for i in range(len(tickers))]
-
 fetch_template_dicts = {}
 for ticker, req_time_interval in zip(tickers, req_time_intervals):
     fetch_base_template_dict.update(
@@ -50,12 +54,12 @@ fetch_usdt_eth = PythonOperator(
     dag=dag,
 )
 
-insert_jsons = PythonOperator(
-    task_id="insert_jsons",
+insert_ohlcvs_task = PythonOperator(
+    task_id="insert_ohlcvs",
     python_callable=insert_ohlcvs,
     dag=dag,
-    templates_dict={"start_time": "{{ ts_nodash }}"},
+    templates_dict=mongo_templates_dict,
 )
 
-fetch_usdt_btc >> insert_jsons
-fetch_usdt_eth >> insert_jsons
+fetch_usdt_btc >> insert_ohlcvs_task
+fetch_usdt_eth >> insert_ohlcvs_task

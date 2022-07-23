@@ -1,25 +1,44 @@
 # airflow-api2db-exercise
 
 ## Prerequisites
-- install docker
-- install docker-compose
-- Make docker/airflow-pymongo/.env file on like [.env sample](https://github.com/instork/airflow-api2db-exercise/blob/main/docker/airflow-pymongo/.env_example)
+- Install docker
+- Install docker-compose
+- Create docker/airflow-pymongo/.env_mongo like below
+    ```
+    MONGODB_USER=airflow
+    MONGODB_PWD=airflow
+    MONGODB_HOST=mongoservice
+    MONGODB_PORT=27017
+    ```
+- Create docker/airflow-pymongo/.env_fred like below
+    ```
+    FRED_API_KEY=<FRED_API_KEY>
+    ```
+
 
 &nbsp;
 
 ## How to run
 - run docker-compose
-```bash
-$ docker-compose up
-$ docker-compose up --build --remove-orphans --force-recreate
-$ docker-compose up --build --remove-orphans --force-recreate --detach
-```
+    ```bash
+    $ docker-compose up
+    $ docker-compose up --build --remove-orphans --force-recreate
+    $ docker-compose up --build --remove-orphans --force-recreate --detach
+    ```
 
 - stop docker-compose
-```bash
-$ docker-compose down
-$ docker-compose down --volumes --remove-orphans
-```
+    ```bash
+    $ docker-compose down
+    $ docker-compose down --volumes --remove-orphans
+    ```
+
+&nbsp;
+
+## Data Time
+- Data Request Time (New York Time)
+    - Upbit Data : every hour from 00:00 GMT-4
+    - Google News : every day from 00:00 GMT-4
+    - Fred Data : every day from 00:00 GMT-4 (might be missing on weekend & holidays)
 
 &nbsp;
 
