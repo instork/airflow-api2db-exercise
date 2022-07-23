@@ -9,7 +9,7 @@ from airflow.operators.python import PythonOperator
 # KST = pendulum.timezone("Asia/Seoul")
 
 dag = DAG(
-    dag_id="branch_without_trigger",
+    dag_id="xcoms_exercise",
     schedule_interval="@once",
     start_date=pendulum.datetime(2022, 7, 20, tz="Asia/Seoul"),
 )
