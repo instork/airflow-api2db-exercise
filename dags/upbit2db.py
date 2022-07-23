@@ -2,13 +2,10 @@ import datetime as dt
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from dotenv import load_dotenv
 
 from mongodb.data2mongo import insert_ohlcvs
 from upbit.request import fetch_minute_ohlcvs
 from utils.timeutils import ETZ
-
-load_dotenv("/tmp/.env")
 
 ########################### Set Configs ###########################
 SCHEDULE_INTERVAL = "0 * * * *"  # every hour
@@ -32,7 +29,7 @@ for ticker, req_time_interval in zip(tickers, req_time_intervals):
 ################################################################
 
 dag = DAG(
-    dag_id="api2db_splitted",
+    dag_id="upbit2db",
     description="Get ohlcv data using upbit API",
     start_date=dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ),
     end_date=dt.datetime(2022, 7, 22, 0, 0, tzinfo=ETZ),
