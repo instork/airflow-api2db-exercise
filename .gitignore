@@ -6,8 +6,7 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 
-docker/airflow-pymongo/.env_fred
-docker/airflow-pymongo/.env_mongo
+docker/airflow-pymongo/*.env
 
 /data/mongodb/*
 !data/**/.gitkeep

@@ -3,14 +3,14 @@
 ## Prerequisites
 - Install docker
 - Install docker-compose
-- Create docker/airflow-pymongo/.env_mongo like below
+- Create docker/airflow-pymongo/mongo.env like below
     ```
     MONGODB_USER=airflow
     MONGODB_PWD=airflow
     MONGODB_HOST=mongoservice
     MONGODB_PORT=27017
     ```
-- Create docker/airflow-pymongo/.env_fred like below
+- Create docker/airflow-pymongo/fred.env like below
     ```
     FRED_API_KEY=<FRED_API_KEY>
     ```
@@ -39,6 +39,20 @@
     - Upbit Data : every hour from 00:00 GMT-4
     - Google News : every day from 00:00 GMT-4
     - Fred Data : every day from 00:00 GMT-4 (might be missing on weekend & holidays)
+
+&nbsp;
+
+## Check data
+``` bash
+$ docker ps -a --no-trunc --filter name=mongo 
+$ docker exec -it <CONTAINER ID> /bin/bash    
+$ mongo -u airflow -p airflow
+$ show dbs
+$ use test_db
+$ show collections
+$ db["<collection_name>"].find()
+$ db.dropDatabase()
+```
 
 &nbsp;
 
