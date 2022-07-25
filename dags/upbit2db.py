@@ -19,12 +19,9 @@ fetch_base_template_dict = {
     "start_time": "{{ ts_nodash }}",
 }
 tickers = ["USDT-BTC", "USDT-ETH"]
-req_time_intervals = [float(i + 1) for i in range(len(tickers))]
 fetch_template_dicts = {}
-for ticker, req_time_interval in zip(tickers, req_time_intervals):
-    fetch_base_template_dict.update(
-        coin_ticker=ticker, req_time_interval=req_time_interval
-    )
+for ticker in tickers:
+    fetch_base_template_dict.update(coin_ticker=ticker)
     fetch_template_dicts[ticker] = fetch_base_template_dict.copy()
 ################################################################
 

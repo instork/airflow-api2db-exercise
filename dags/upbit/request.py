@@ -1,18 +1,18 @@
 import json
 import logging
+import random
 import time
 from typing import Dict, List
 
 import requests
 from utils.timeutils import str2pend_datetime
-import random
+
 
 def _get_minutes_ohlcvs(
     interval: int,
     ticker: str,
     to: str,
     count: int,
-    req_time_interval: float = 0,
 ) -> List[Dict]:
     """Get ohlcvs until datetime 'to'."""
 
@@ -29,7 +29,6 @@ def _get_minutes_ohlcvs(
 def fetch_minute_ohlcvs(templates_dict, **context):
     """Get ohlcvs and save."""
     logger = logging.getLogger(__name__)
-    req_time_interval = templates_dict["req_time_interval"]
     minute_interval = templates_dict["minute_interval"]
     get_cnt = templates_dict["get_cnt"]
     coin_ticker = templates_dict["coin_ticker"]
@@ -39,9 +38,7 @@ def fetch_minute_ohlcvs(templates_dict, **context):
     start_time = str2pend_datetime(start_time, "YYYYMMDDTHHmmss", "UTC")
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
 
-    ohlcvs = _get_minutes_ohlcvs(
-        minute_interval, coin_ticker, start_time, get_cnt, req_time_interval
-    )
+    ohlcvs = _get_minutes_ohlcvs(minute_interval, coin_ticker, start_time, get_cnt)
     return ohlcvs
 
 
