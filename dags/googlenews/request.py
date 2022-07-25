@@ -1,9 +1,10 @@
-import time
 import logging
-import random 
-from GoogleNews import GoogleNews
+import random
+import time
 
+from GoogleNews import GoogleNews
 from utils.timeutils import get_str_date_before_from_ts
+
 
 def fetch_news(templates_dict, **context):
     logger = logging.getLogger(__name__)
@@ -16,7 +17,8 @@ def fetch_news(templates_dict, **context):
     results = {k: [] for k in queries.keys()}
     for key in queries.keys():
         for q in queries[key]:
-            time.sleep(random.randint(1,2)+random.random())
+            logger.info("")
+            time.sleep(random.random())
             googlenews = GoogleNews(start=start_date, end=start_date)
             googlenews.search(q)
             result = googlenews.get_texts()
@@ -27,12 +29,13 @@ def fetch_news(templates_dict, **context):
 
     return results
 
-# {'BTC-News': 
-        # ["Tesla Sold Most of Its Bitcoin to Shore Up Carmaker's Liquidity",
-        #  'What to do with bitcoin: Tesla dumps a big chunk if its holdings - should you?',
-        # ....]
-#  'ETH-News': 
-        #  ["Will 'Ethereum Killers' takeover ETH in 2022?",
-        #  'Ethereum will reach 100,000 transactions per second',
-        # ...]
+
+# {'BTC-News':
+# ["Tesla Sold Most of Its Bitcoin to Shore Up Carmaker's Liquidity",
+#  'What to do with bitcoin: Tesla dumps a big chunk if its holdings - should you?',
+# ....]
+#  'ETH-News':
+#  ["Will 'Ethereum Killers' takeover ETH in 2022?",
+#  'Ethereum will reach 100,000 transactions per second',
+# ...]
 #  }

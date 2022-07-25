@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import time
 from typing import Dict, List
 
@@ -12,14 +13,13 @@ def _get_minutes_ohlcvs(
     ticker: str,
     to: str,
     count: int,
-    req_time_interval: float = 0,
-    logger: logging.RootLogger = None,
 ) -> List[Dict]:
     """Get ohlcvs until datetime 'to'."""
 
     url = f"https://api.upbit.com/v1/candles/minutes/{interval}?market={ticker}&to={to}&count={count}"
     headers = {"Accept": "application/json"}
-    time.sleep(req_time_interval)
+    # time.sleep(req_time_interval)
+    time.sleep(random.random())
     response = requests.get(url, headers=headers)
     response = json.loads(response.text)
 
@@ -29,20 +29,16 @@ def _get_minutes_ohlcvs(
 def fetch_minute_ohlcvs(templates_dict, **context):
     """Get ohlcvs and save."""
     logger = logging.getLogger(__name__)
-    req_time_interval = templates_dict["req_time_interval"]
     minute_interval = templates_dict["minute_interval"]
     get_cnt = templates_dict["get_cnt"]
     coin_ticker = templates_dict["coin_ticker"]
 
-    start_time = templates_dict[
-        "start_time"
-    ]  # 이미 UTC로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
+    # 이미 UTC로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
+    start_time = templates_dict["start_time"]
     start_time = str2pend_datetime(start_time, "YYYYMMDDTHHmmss", "UTC")
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
 
-    ohlcvs = _get_minutes_ohlcvs(
-        minute_interval, coin_ticker, start_time, get_cnt, req_time_interval
-    )
+    ohlcvs = _get_minutes_ohlcvs(minute_interval, coin_ticker, start_time, get_cnt)
     return ohlcvs
 
 
