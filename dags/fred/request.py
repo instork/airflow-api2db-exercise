@@ -1,15 +1,14 @@
-import time
 import logging
 import os
 import random
+import time
 
 from dotenv import load_dotenv
 from fredapi import Fred
-
 from utils.timeutils import get_str_date_before_from_ts
 
+load_dotenv("/tmp/fred.env")
 
-load_dotenv("/tmp/.env_fred")
 
 def fetch_fred(templates_dict, **context):
     logger = logging.getLogger(__name__)
@@ -22,9 +21,9 @@ def fetch_fred(templates_dict, **context):
     start_date = get_str_date_before_from_ts(start_time, date_format="%Y-%m-%d")
 
     fred_data = {}
-    
+
     for ticker in fred_series_tickers:
-        time.sleep(random.randint(1,2)+random.random())
+        time.sleep(random.random())
         cur_data = fred.get_series(
             ticker, observation_start=start_date, observation_end=start_date
         )
@@ -32,12 +31,9 @@ def fetch_fred(templates_dict, **context):
             fred_data[ticker] = float(cur_data.values[0])
         else:
             fred_data[ticker] = None
-    
-        logger.info(fred.get_series_info(ticker))
-        
-    logger.info(fred_data)
 
     return fred_data
+
 
 # {'T5YIE': 2.56,
 #  'T5YIFR': 2.12,

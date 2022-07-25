@@ -6,13 +6,13 @@ from typing import Dict, List
 from airflow.decorators import task
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from utils.timeutils import (ETZ, json_strptime, pend2datetime,
-                             str2pend_datetime, get_datetime_from_ts)
+from utils.timeutils import get_datetime_from_ts, json_strptime
 
-load_dotenv("/tmp/.env_mongo")
+load_dotenv("/tmp/mongo.env")
 
 # turn this on when test is done
 INDEX_UNIQUE = False
+
 
 def _get_mongo_client():
     """Get mongo client."""
@@ -45,8 +45,11 @@ def insert_ohlcvs(templates_dict, **context):
 
     # Make collection
     if ticker not in db.list_collection_names():
-        db.create_collection(ticker)
-        db[ticker].create_index([("etz_time", 1)], unique=INDEX_UNIQUE)
+        try:
+            db.create_collection(ticker)
+            db[ticker].create_index([("etz_time", 1)], unique=INDEX_UNIQUE)
+        except Exception as e:
+            logger.info(e)
 
     db[ticker].insert_many(json_dicts)
 
@@ -59,7 +62,7 @@ def insert_single(templates_dict, **context):
     db_name = templates_dict["db_name"]
     collection_name = templates_dict["collection_name"]
     etz_time = get_datetime_from_ts(start_time, get_day_before=True)
-    
+
     prev_task_id = next(iter(context["task"].upstream_task_ids))
     single_dict = context["task_instance"].xcom_pull(task_ids=prev_task_id)
     single_dict.update(etz_time=etz_time)
@@ -67,9 +70,10 @@ def insert_single(templates_dict, **context):
     mongo_client = _get_mongo_client()
     db = mongo_client[db_name]
     if collection_name not in db.list_collection_names():
-        db.create_collection(collection_name)
-        db[collection_name].create_index([("etz_time", 1)], unique=INDEX_UNIQUE)
-    
-    logger.info(single_dict)
-    db[collection_name].insert_one(single_dict)
+        try:
+            db.create_collection(collection_name)
+            db[collection_name].create_index([("etz_time", 1)], unique=INDEX_UNIQUE)
+        except Exception as e:
+            logger.info(e)
 
+    db[collection_name].insert_one(single_dict)

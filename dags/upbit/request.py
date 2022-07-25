@@ -5,7 +5,7 @@ from typing import Dict, List
 
 import requests
 from utils.timeutils import str2pend_datetime
-
+import random
 
 def _get_minutes_ohlcvs(
     interval: int,
@@ -13,13 +13,13 @@ def _get_minutes_ohlcvs(
     to: str,
     count: int,
     req_time_interval: float = 0,
-    logger: logging.RootLogger = None,
 ) -> List[Dict]:
     """Get ohlcvs until datetime 'to'."""
 
     url = f"https://api.upbit.com/v1/candles/minutes/{interval}?market={ticker}&to={to}&count={count}"
     headers = {"Accept": "application/json"}
-    time.sleep(req_time_interval)
+    # time.sleep(req_time_interval)
+    time.sleep(random.random())
     response = requests.get(url, headers=headers)
     response = json.loads(response.text)
 
@@ -34,9 +34,8 @@ def fetch_minute_ohlcvs(templates_dict, **context):
     get_cnt = templates_dict["get_cnt"]
     coin_ticker = templates_dict["coin_ticker"]
 
-    start_time = templates_dict[
-        "start_time"
-    ]  # 이미 UTC로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
+    # 이미 UTC로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
+    start_time = templates_dict["start_time"]
     start_time = str2pend_datetime(start_time, "YYYYMMDDTHHmmss", "UTC")
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
 

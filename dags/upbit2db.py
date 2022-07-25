@@ -2,7 +2,6 @@ import datetime as dt
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-
 from mongodb.data2mongo import insert_ohlcvs
 from upbit.request import fetch_minute_ohlcvs
 from utils.timeutils import ETZ
@@ -10,10 +9,7 @@ from utils.timeutils import ETZ
 ########################### Set Configs ###########################
 SCHEDULE_INTERVAL = "0 * * * *"  # every hour
 ## mongodb
-mongo_templates_dict = {
-    "db_name": "test_db",
-    "start_time": "{{ ts_nodash }}"
-}
+mongo_templates_dict = {"db_name": "test_db", "start_time": "{{ ts_nodash }}"}
 ## upbit
 MINUTE_INTERVAL = 60
 GET_CNT = 1
@@ -38,6 +34,12 @@ dag = DAG(
     start_date=dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ),
     end_date=dt.datetime(2022, 7, 22, 0, 0, tzinfo=ETZ),
     schedule_interval=SCHEDULE_INTERVAL,
+    max_active_runs=4,
+    default_args={
+        "depends_on_past": True,
+        "retries": 3,
+        "retry_delay": dt.timedelta(minutes=2),
+    },
 )
 
 fetch_usdt_btc = PythonOperator(

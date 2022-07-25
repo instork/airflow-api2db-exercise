@@ -39,17 +39,22 @@ def pend2datetime(p_time: pendulum.datetime):
     return dt_datetime
 
 
-def get_str_date_before_from_ts(ts: str, date_format:str = "%Y-%m-%d", tz:pendulum.timezone=ETZ) -> str:
+def get_str_date_before_from_ts(
+    ts: str, date_format: str = "%Y-%m-%d", tz: pendulum.timezone = ETZ
+) -> str:
     """
     Get string datetime from ts(start_time). start time automatically converted to UCT.
     Chagege to tz(ETZ, default) and returns to string date_format
     """
     start_time = str2pend_datetime(ts, "YYYYMMDDTHHmmss", "UCT")
-    etz_time = tz.convert(start_time).subtract(minutes=1) # to get data day before
+    etz_time = tz.convert(start_time).subtract(minutes=1)  # to get data day before
     start_date = etz_time.strftime(date_format)
     return start_date
 
-def get_datetime_from_ts(ts: str, get_day_before=False, tz:pendulum.timezone=ETZ) -> dt.datetime:
+
+def get_datetime_from_ts(
+    ts: str, get_day_before=False, tz: pendulum.timezone = ETZ
+) -> dt.datetime:
     """
     Get dt.datetime form ts(start_time).
     """
