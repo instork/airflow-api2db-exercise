@@ -34,6 +34,10 @@
 
 &nbsp;
 
+## version
+- Python 3.8
+- MongoDB 4.4.15
+
 ## Data Time
 - Data Request Time (New York Time)
     - Upbit Data : every hour from 00:00 GMT-4
