@@ -14,6 +14,10 @@
     ```
     FRED_API_KEY=<FRED_API_KEY>
     ```
+- Create airflow.env like below to set an account
+    ```
+
+    ```
 
 
 &nbsp;
@@ -44,14 +48,14 @@
 
 ## Check data
 ``` bash
-$ docker ps -a --no-trunc --filter name=mongo 
+$ docker ps -a --filter name=mongo 
 $ docker exec -it <CONTAINER ID> /bin/bash    
 $ mongo -u airflow -p airflow
 $ show dbs
 $ use test_db
 $ show collections
 $ db["<collection_name>"].find()
-$ db.dropDatabase()
+$ db.dropDatabase() # to Drop database
 ```
 
 &nbsp;
@@ -64,3 +68,12 @@ $ db.dropDatabase()
 - Make docker/airflow-pymongo/.env file on like [.env sample](https://github.com/instork/airflow-api2db-exercise/blob/main/docker/airflow-pymongo/.env_example)
     - change MONGODB_USER, MONGODB_PWD
 - Use docker-compose-localdb.yaml as docker-compose.yaml
+    ```bash
+    $ docker-compose -f docker-compose.localdb.yaml up
+    $ docker-compose -f docker-compose.localdb.yaml up --build --remove-orphans --force-recreate
+    $ docker-compose -f docker-compose.localdb.yaml up --build --remove-orphans --force-recreate --detach
+    ```
+    ```bash
+    $ docker-compose -f docker-compose.localdb.yaml down
+    $ docker-compose -f docker-compose.localdb.yaml down --volumes --remove-orphans
+    ```
