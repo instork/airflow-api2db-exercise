@@ -38,8 +38,8 @@ news_templates_dict = {"queries": queries, "start_time": "{{ ts_nodash }}"}
 dag = DAG(
     dag_id="fred_news2db",
     description="Get fred data and news and load on MongoDB",
-    start_date=dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ),
-    end_date=dt.datetime(2022, 7, 22, 0, 0, tzinfo=ETZ),
+    start_date=dt.datetime(2019, 1, 1, 0, 0, tzinfo=ETZ),
+    end_date=dt.datetime(2022, 7, 27, 0, 0, tzinfo=ETZ),
     schedule_interval=SCHEDULE_INTERVAL,
     max_active_runs=4,
     default_args={

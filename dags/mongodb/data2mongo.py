@@ -11,7 +11,7 @@ from utils.timeutils import get_datetime_from_ts, json_strptime
 load_dotenv("/tmp/mongo.env")
 
 # turn this on when test is done
-INDEX_UNIQUE = False
+INDEX_UNIQUE = True
 
 
 def _get_mongo_client():
@@ -35,6 +35,7 @@ def insert_ohlcvs(templates_dict, **context):
     json_dicts = context["task_instance"].xcom_pull(task_ids=prev_task_id)
     json_dicts = json_strptime(json_dicts)
     ticker = json_dicts[0]["market"]
+    logger.info(json_dicts)
 
     for d in json_dicts:
         d.update({"etz_time": etz_time})
