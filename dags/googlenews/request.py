@@ -4,6 +4,7 @@ import time
 
 from GoogleNews import GoogleNews
 from utils.timeutils import get_str_date_before_from_ts
+from airflow.exceptions import AirflowException
 
 
 def fetch_news(templates_dict, **context):
@@ -17,8 +18,7 @@ def fetch_news(templates_dict, **context):
     results = {k: [] for k in queries.keys()}
     for key in queries.keys():
         for q in queries[key]:
-            logger.info("")
-            time.sleep(random.random())
+            time.sleep(random.randint(1,10)+random.random())
             googlenews = GoogleNews(start=start_date, end=start_date)
             googlenews.search(q)
             result = googlenews.get_texts()
@@ -26,6 +26,9 @@ def fetch_news(templates_dict, **context):
             results[key] += result
 
         results[key] = list(set(results[key]))
+        if len(results[key]):
+            logger.info(results)
+            raise AirflowException("Too many request are concerned!")
 
     return results
 
