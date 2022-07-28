@@ -18,7 +18,7 @@ def fetch_news(templates_dict, **context):
     results = {k: [] for k in queries.keys()}
     for key in queries.keys():
         for q in queries[key]:
-            time.sleep(random.randint(1,10)+random.random())
+            time.sleep(random.randint(10,40)+random.random())
             googlenews = GoogleNews(start=start_date, end=start_date)
             googlenews.search(q)
             result = googlenews.get_texts()
@@ -26,9 +26,9 @@ def fetch_news(templates_dict, **context):
             results[key] += result
 
         results[key] = list(set(results[key]))
-        if len(results[key]):
+        if len(results[key]) == 0:
             logger.info(results)
-            raise AirflowException("Too many request are concerned!")
+            assert len(results[key]) != 0
 
     return results
 

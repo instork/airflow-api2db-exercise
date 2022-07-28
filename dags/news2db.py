@@ -31,8 +31,8 @@ dag = DAG(
     max_active_runs=1,
     default_args={
         "depends_on_past": True,
-        "retries": 3,
-        "retry_delay": dt.timedelta(minutes=random.randint(5,10)),
+        "retries": 5,
+        "retry_delay": dt.timedelta(minutes=random.randint(1,10)),
     },
 )
 
