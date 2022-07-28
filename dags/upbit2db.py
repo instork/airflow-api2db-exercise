@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from mongodb.data2mongo import insert_ohlcvs
 from upbit.request import fetch_minute_ohlcvs
-from utils.timeutils import ETZ
+from utils.timeutils import UTC
 
 ########################### Set Configs ###########################
 SCHEDULE_INTERVAL = "0 * * * *"  # every hour
@@ -28,8 +28,7 @@ for ticker in tickers:
 dag = DAG(
     dag_id="upbit2db",
     description="Get ohlcv data using upbit API",
-    start_date=dt.datetime(2019, 1, 1, 0, 0, tzinfo=ETZ),
-    end_date=dt.datetime(2022, 7, 27, 0, 0, tzinfo=ETZ),
+    start_date=dt.datetime(2020, 1, 1, 0, 0, tzinfo=UTC),
     schedule_interval=SCHEDULE_INTERVAL,
     max_active_runs=4,
     default_args={
@@ -53,12 +52,19 @@ fetch_usdt_eth = PythonOperator(
     dag=dag,
 )
 
-insert_ohlcvs_task = PythonOperator(
-    task_id="insert_ohlcvs",
+insert_btc_ohlcvs_task = PythonOperator(
+    task_id="insert_ohlcvs_btc",
     python_callable=insert_ohlcvs,
     dag=dag,
     templates_dict=mongo_templates_dict,
 )
 
-fetch_usdt_btc >> insert_ohlcvs_task
-fetch_usdt_eth >> insert_ohlcvs_task
+insert_eth_ohlcvs_task = PythonOperator(
+    task_id="insert_ohlcvs_eth",
+    python_callable=insert_ohlcvs,
+    dag=dag,
+    templates_dict=mongo_templates_dict,
+)
+
+fetch_usdt_btc >> insert_btc_ohlcvs_task
+fetch_usdt_eth >> insert_eth_ohlcvs_task

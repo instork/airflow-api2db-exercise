@@ -33,7 +33,7 @@ services:
       - POSTGRES_DB=airflow
     ports:
       - "5432:5432"
-  
+
   init:
     build:
       context: ./docker/airflow-data
@@ -47,7 +47,7 @@ services:
     env_file:
       - airflow.env
     command: -c "airflow db upgrade && sleep 5 && airflow users create --username $$AIRFLOW_USER --password $$AIRFLOW_PWD --firstname Anonymous --lastname Admin --role Admin --email admin@example.org"
-  
+
   webserver:
     build:
       context: ./docker/airflow-data
