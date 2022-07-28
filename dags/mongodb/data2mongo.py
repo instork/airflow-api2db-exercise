@@ -6,7 +6,7 @@ from typing import Dict, List
 from airflow.decorators import task
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from utils.timeutils import get_datetime_from_ts, json_strptime
+from utils.timeutils import get_datetime_from_ts, json_strptime, UTC
 
 load_dotenv("/tmp/mongo.env")
 
@@ -29,7 +29,7 @@ def insert_ohlcvs(templates_dict, **context):
     # 이미 UTC로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
     start_time = templates_dict["start_time"]
     db_name = templates_dict["db_name"]
-    etz_time = get_datetime_from_ts(start_time, get_day_before=False)
+    utc_time = get_datetime_from_ts(start_time, get_day_before=False, tz=UTC)
 
     prev_task_id = next(iter(context["task"].upstream_task_ids))
     json_dicts = context["task_instance"].xcom_pull(task_ids=prev_task_id)
@@ -38,7 +38,9 @@ def insert_ohlcvs(templates_dict, **context):
     logger.info(json_dicts)
 
     for d in json_dicts:
-        d.update({"etz_time": etz_time})
+        # 동부시간의 서머타임으로 인해 서머타임 해제 시, 겹치기 때문에 etz_time은 인덱스가 될 수 없음
+        # 업비트 서버점검으로 인해 candle_date_time_utc는 인덱스가 될 수 없음(겹침)
+        d.update({"utc_time": utc_time})
 
     # Get database
     mongo_client = _get_mongo_client()
@@ -48,7 +50,7 @@ def insert_ohlcvs(templates_dict, **context):
     if ticker not in db.list_collection_names():
         try:
             db.create_collection(ticker)
-            db[ticker].create_index([("etz_time", 1)], unique=INDEX_UNIQUE)
+            db[ticker].create_index([("utc_time", 1)], unique=INDEX_UNIQUE)
         except Exception as e:
             logger.info(e)
 
