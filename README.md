@@ -45,9 +45,9 @@
 
 ## Data Time
 - Data Request Time (New York Time)
-  - Upbit Data : every hour from 00:00 GMT-4
-  - Google News : every day from 00:00 GMT-4
-  - Fred Data : every day from 00:00 GMT-4 (might be missing on weekend & holidays)
+    - Upbit Data : every hour from 00:00 GMT-4
+    - Google News : every day from 00:00 GMT-4
+    - Fred Data : every day from 00:00 GMT-4 (might be missing on weekend & holidays)
 
 &nbsp;
 
@@ -67,15 +67,11 @@ $ db.dropDatabase() # to Drop database
 
 ## (Optional) Prerequisites for MongoDB on local
 - Make mongodb user
-  - https://medium.com/mongoaudit/how-to-enable-authentication-on-mongodb-b9e8a924efac
+    - https://medium.com/mongoaudit/how-to-enable-authentication-on-mongodb-b9e8a924efac
 - Connecting from a Docker container to a local MongoDB
-  - https://tsmx.net/docker-local-mongodb/
+    - https://tsmx.net/docker-local-mongodb/
 - Make docker/airflow-pymongo/.env file on like [.env sample](https://github.com/instork/airflow-api2db-exercise/blob/main/docker/airflow-pymongo/.env_example)
-<<<<<<< HEAD
   - change MONGODB_USER, MONGODB_PWD
-=======
-    - change MONGODB_USER, MONGODB_PWD
->>>>>>> 49b70c54d0cfc9e40ed6a66b9b34c4c1d6a79864
 - Use docker-compose-localdb.yaml as docker-compose.yaml
     ```bash
     $ docker-compose -f docker-compose.localdb.yaml up
@@ -85,8 +81,4 @@ $ db.dropDatabase() # to Drop database
     ```bash
     $ docker-compose -f docker-compose.localdb.yaml down
     $ docker-compose -f docker-compose.localdb.yaml down --volumes --remove-orphans
-<<<<<<< HEAD
     ```
-=======
-    ```
->>>>>>> 49b70c54d0cfc9e40ed6a66b9b34c4c1d6a79864
