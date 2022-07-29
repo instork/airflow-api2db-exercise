@@ -40,10 +40,10 @@
 &nbsp;
 
 ## Data Time
-- Data Request Time (New York Time)
-    - Upbit Data : every hour from 00:00 GMT-4
-    - Google News : every day from 00:00 GMT-4
-    - Fred Data : every day from 00:00 GMT-4 (might be missing on weekend & holidays)
+- Data Request Time 
+    - Upbit Data : every hour from 00:00 (UCT)
+    - Google News : every day from 00:00 (Eastern Time: EST EDT)
+    - Fred Data : every day from 00:00 (Eastern Time: EST EDT) (missing on weekend & holidays)
 
 &nbsp;
 
@@ -56,7 +56,11 @@ $ show dbs
 $ use test_db
 $ show collections
 $ db["<collection_name>"].find()
+$ db["USDT-BTC"].find({}).sort({"candle_date_time_utc":1}).limit(1);
 $ db.dropDatabase() # to Drop database
+$ db["USDT-BTC"].find({}).sort({"utc_time":-1}).limit(1)
+$ db["news"].find({}).sort({"etz_time":-1}).limit(1);
+$ db["fred"].find({}).sort({"etz_time":-1}).limit(1);
 ```
 
 &nbsp;
@@ -78,3 +82,7 @@ $ db.dropDatabase() # to Drop database
     $ docker-compose -f docker-compose.localdb.yaml down
     $ docker-compose -f docker-compose.localdb.yaml down --volumes --remove-orphans
     ```
+
+## For m1 mac
+- 
+
