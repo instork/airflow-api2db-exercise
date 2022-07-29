@@ -83,6 +83,3 @@ $ db["fred"].find({}).sort({"etz_time":-1}).limit(1);
     $ docker-compose -f docker-compose.localdb.yaml down --volumes --remove-orphans
     ```
 
-## For m1 mac
-- 
-
