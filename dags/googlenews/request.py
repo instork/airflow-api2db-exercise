@@ -18,7 +18,7 @@ def fetch_news(templates_dict, **context):
     results = {k: [] for k in queries.keys()}
     for key in queries.keys():
         for q in queries[key]:
-            time.sleep(random.randint(10,40)+random.random())
+            time.sleep(random.randint(30,60)+random.random())
             googlenews = GoogleNews(start=start_date, end=start_date)
             googlenews.search(q)
             result = googlenews.get_texts()
