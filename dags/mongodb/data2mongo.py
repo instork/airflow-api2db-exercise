@@ -38,8 +38,8 @@ def insert_ohlcvs(templates_dict, **context):
     logger.info(json_dicts)
 
     for d in json_dicts:
-        # 동부시간의 서머타임으로 인해 서머타임 해제 시, 겹치기 때문에 etz_time은 인덱스가 될 수 없음
-        # 업비트 서버점검으로 인해 candle_date_time_utc는 인덱스가 될 수 없음(겹침)
+        # 동부시간의 서머타임으로 인해 서머타임 해제 시, 겹치기 때문에 etz_time 은 인덱스가 될 수 없음
+        # 업비트 서버점검으로 인해 candle_date_time_utc 는 인덱스가 될 수 없음(겹침)
         d.update({"utc_time": utc_time})
 
     # Get database
