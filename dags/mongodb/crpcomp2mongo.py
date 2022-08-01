@@ -11,11 +11,10 @@ from utils.timeutils import get_datetime_from_ts, json_strptime, UTC
 load_dotenv("/tmp/mongo.env")
 
 # turn this on when test is done
-INDEX_UNIQUE = True
+INDEX_UNIQUE = False
 
 
 def _get_mongo_client():
-    """Get mongo client."""
     user = os.getenv("MONGODB_USER")
     pwd = os.getenv("MONGODB_PWD")
     host = os.getenv("MONGODB_HOST")
@@ -26,15 +25,17 @@ def _get_mongo_client():
 
 def insert_ohlcvs(templates_dict, **context):
     logger = logging.getLogger(__name__)
+
     # 이미 UTC 로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
+    # start_time = "20220601T040000"
     start_time = templates_dict["start_time"]
     db_name = templates_dict["db_name"]
+    collection_name = templates_dict["collection_name"]
+
     utc_time = get_datetime_from_ts(start_time, get_day_before=False, tz=UTC)
 
     prev_task_id = next(iter(context["task"].upstream_task_ids))
     json_dicts = context["task_instance"].xcom_pull(task_ids=prev_task_id)
-    json_dicts = json_strptime(json_dicts)
-    ticker = json_dicts[0]["market"]
     logger.info(json_dicts)
 
     for d in json_dicts:
@@ -47,15 +48,14 @@ def insert_ohlcvs(templates_dict, **context):
     db = mongo_client[db_name]
 
     # Make collection
-    if ticker not in db.list_collection_names():
+    if collection_name not in db.list_collection_names():
         try:
-            db.create_collection(ticker)
-            db[ticker].create_index([("utc_time", 1)], unique=INDEX_UNIQUE)
+            db.create_collection(collection_name)
+            db[collection_name].create_index([("utc_time", 1)], unique=INDEX_UNIQUE)
         except Exception as e:
             logger.info(e)
 
-    db[ticker].insert_many(json_dicts)
-
+    db[collection_name].insert_many(json_dicts)
     mongo_client.close()
 
 

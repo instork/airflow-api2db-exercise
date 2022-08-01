@@ -2,39 +2,36 @@ import datetime as dt
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from mongodb.data2mongo import insert_ohlcvs
-from crypcomp.request import fetch_minute_ohlcvs
+from mongodb.crpcomp2mongo import insert_ohlcvs
+from crypcomp.request import fetch_hour_ohlcvs
 from utils.timeutils import UTC
 
 ########################### Set Configs ###########################
 SCHEDULE_INTERVAL = "0 * * * *"  # every hour
+
 ## mongodb
-mongo_templates_dict = {"db_name": "test_db", "start_time": "{{ ts_nodash }}"}
-## upbit
-MINUTE_INTERVAL = 60
+mongo_templates_dict = {"db_name": "test_db",
+                        "start_time": "{{ ts_nodash }}"}
 GET_CNT = 1
-timestamp = ""
-
-parameters = {'fsym': "BTC",
-              'tsym': "USDT",
-              'limit': 1,
-              'aggregate': 1,
-              'toTs': timestamp}
-
 
 fetch_base_template_dict = {
     "limit": GET_CNT,
     "aggregate": 1,
-    "start_time": "{{ ts_nodash }}",
+    "toTs": "{{ ts_nodash }}",
 }
 
 tickers = ["USDT-BTC", "USDT-ETH"]
 
 fetch_template_dicts = {}
+mongo_templates_dicts = {}
+
 # ticker = tickers[0]
 for ticker in tickers:
     tsym, fsym = ticker.split("-")
     fetch_base_template_dict.update({"tsym": tsym, "fsym": fsym})
+    mongo_templates_dict.update({"collection_name": ticker})
+
+    mongo_templates_dicts[ticker] = mongo_templates_dict.copy()
     fetch_template_dicts[ticker] = fetch_base_template_dict.copy()
 ################################################################
 
@@ -46,7 +43,7 @@ dag = DAG(
     max_active_runs=4,
     default_args={
         "depends_on_past": True,
-        "retries": 3,
+        "retries": 0,
         "retry_delay": dt.timedelta(minutes=2),
     },
 )
@@ -69,14 +66,14 @@ insert_btc_ohlcvs_task = PythonOperator(
     task_id="insert_ohlcvs_btc",
     python_callable=insert_ohlcvs,
     dag=dag,
-    templates_dict=mongo_templates_dict,
+    templates_dict=mongo_templates_dicts["USDT-BTC"],
 )
 
 insert_eth_ohlcvs_task = PythonOperator(
     task_id="insert_ohlcvs_eth",
     python_callable=insert_ohlcvs,
     dag=dag,
-    templates_dict=mongo_templates_dict,
+    templates_dict=mongo_templates_dicts["USDT-ETH"],
 )
 
 fetch_usdt_btc >> insert_btc_ohlcvs_task

@@ -11,7 +11,7 @@ from airflow.operators.python import PythonOperator
 dag = DAG(
     dag_id="xcoms_exercise",
     schedule_interval="@once",
-    start_date=pendulum.datetime(2022, 7, 20, tz="Asia/Seoul"),
+    start_date=pendulum.datetime(2022, 7, 29, tz="Asia/Seoul"),
 )
 
 

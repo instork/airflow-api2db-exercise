@@ -9,10 +9,10 @@ from utils.timeutils import str2pend_datetime
 
 
 def _get_minutes_ohlcvs(
-    interval: int,
-    ticker: str,
-    to: str,
-    count: int,
+        interval: int,
+        ticker: str,
+        to: str,
+        count: int,
 ) -> List[Dict]:
     """Get ohlcvs until datetime 'to'."""
 
@@ -40,8 +40,6 @@ def fetch_minute_ohlcvs(templates_dict, **context):
 
     ohlcvs = _get_minutes_ohlcvs(minute_interval, coin_ticker, start_time, get_cnt)
     return ohlcvs
-
-
 
 
 # import requests
