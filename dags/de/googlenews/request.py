@@ -3,8 +3,7 @@ import random
 import time
 
 from GoogleNews import GoogleNews
-from utils.timeutils import get_str_date_before_from_ts
-from airflow.exceptions import AirflowException
+from de.utils.timeutils import get_str_date_before_from_ts
 
 
 def fetch_news(templates_dict, **context):

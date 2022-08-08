@@ -6,7 +6,7 @@ from typing import Dict, List
 from airflow.decorators import task
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from utils.timeutils import get_datetime_from_ts, json_strptime, UTC
+from de.utils.timeutils import get_datetime_from_ts, json_strptime, UTC
 
 load_dotenv("/tmp/mongo.env")
 

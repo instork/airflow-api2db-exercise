@@ -5,7 +5,7 @@ import time
 
 from dotenv import load_dotenv
 from fredapi import Fred
-from utils.timeutils import get_str_date_before_from_ts
+from de.utils.timeutils import get_str_date_before_from_ts
 
 load_dotenv("/tmp/fred.env")
 

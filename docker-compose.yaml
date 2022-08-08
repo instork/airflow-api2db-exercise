@@ -36,10 +36,10 @@ services:
   
   init:
     build:
-      context: ./docker/airflow-data
+      context: ./docker/airflow-base
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: instork/airflow-data
+    image: instork/airflow-init
     depends_on:
       - postgres
     environment: *airflow_environment
@@ -50,15 +50,15 @@ services:
   
   webserver:
     build:
-      context: ./docker/airflow-data
+      context: ./docker/airflow-base
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: instork/airflow-data
+    image: instork/airflow-webserver
     restart: always
     depends_on:
       - postgres
     ports:
-      - "8080:8080"
+      - "8085:8080"
     volumes:
       - logs:/opt/airflow/logs
     environment: *airflow_environment
@@ -66,10 +66,10 @@ services:
 
   scheduler:
     build:
-      context: ./docker/airflow-pymongo
+      context: ./docker/airflow-de
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: instork/airflow-pymongo
+    image: instork/airflow-de
     restart: always
     depends_on:
       - postgres
@@ -79,8 +79,6 @@ services:
       - logs:/opt/airflow/logs
     environment: *airflow_environment
     command: scheduler
-#    extra_hosts:
-#      - 'mongoservice:172.17.0.1'
 
   mongodb:
     hostname: mongoservice
@@ -88,7 +86,7 @@ services:
     image: mongo:4.4.15
     restart: always
     ports:
-      - 27017:27017
+      - 27018:27017
     volumes:
       - ./data/mongodb:/data/db
     environment:
