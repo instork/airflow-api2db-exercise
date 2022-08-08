@@ -1,5 +1,5 @@
-import random
 import datetime as dt
+import random
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -51,4 +51,3 @@ insert_fred_task = PythonOperator(
 )
 
 fetch_fred_task >> insert_fred_task
-

@@ -5,7 +5,7 @@ from typing import Dict, List
 import pendulum
 
 KST = pendulum.timezone("Asia/Seoul")
-ETZ = pendulum.timezone("US/Eastern") # EST/EDT
+ETZ = pendulum.timezone("US/Eastern")  # EST/EDT
 UTC = pendulum.timezone("UTC")
 
 

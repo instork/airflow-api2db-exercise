@@ -1,5 +1,5 @@
-import random
 import datetime as dt
+import random
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -32,7 +32,7 @@ dag = DAG(
     default_args={
         "depends_on_past": False,
         "retries": 5,
-        "retry_delay": dt.timedelta(minutes=random.randint(5,15)),
+        "retry_delay": dt.timedelta(minutes=random.randint(5, 15)),
     },
 )
 

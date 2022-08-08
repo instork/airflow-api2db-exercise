@@ -3,9 +3,9 @@ import os
 import random
 import time
 
+from de.utils.timeutils import get_str_date_before_from_ts
 from dotenv import load_dotenv
 from fredapi import Fred
-from de.utils.timeutils import get_str_date_before_from_ts
 
 load_dotenv("/tmp/fred.env")
 

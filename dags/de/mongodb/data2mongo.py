@@ -4,9 +4,9 @@ import os
 from typing import Dict, List
 
 from airflow.decorators import task
+from de.utils.timeutils import UTC, get_datetime_from_ts, json_strptime
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from de.utils.timeutils import get_datetime_from_ts, json_strptime, UTC
 
 load_dotenv("/tmp/mongo.env")
 
