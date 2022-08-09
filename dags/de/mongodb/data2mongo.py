@@ -11,7 +11,7 @@ from pymongo import MongoClient
 load_dotenv("/tmp/mongo.env")
 
 # turn this on when test is done
-INDEX_UNIQUE = True
+INDEX_UNIQUE = False
 
 
 def _get_mongo_client():
@@ -22,6 +22,16 @@ def _get_mongo_client():
     port = os.getenv("MONGODB_PORT")
     client = MongoClient(f"mongodb://{user}:{pwd}@{host}:{port}")
     return client
+
+def get_mongo_client():
+    """Get mongo client."""
+    user = os.getenv("MONGODB_USER")
+    pwd = os.getenv("MONGODB_PWD")
+    host = os.getenv("MONGODB_HOST")
+    port = os.getenv("MONGODB_PORT")
+    client = MongoClient(f"mongodb://{user}:{pwd}@{host}:{port}")
+    return client
+
 
 
 def insert_ohlcvs(templates_dict, **context):
