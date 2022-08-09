@@ -1,16 +1,15 @@
-import logging
-import os
-import random
-import time
-
-from dotenv import load_dotenv
-from fredapi import Fred
-from utils.timeutils import get_str_date_before_from_ts
-
-load_dotenv("/tmp/fred.env")
-
-
 def fetch_fred(templates_dict, **context):
+    import logging
+    import os
+    import random
+    import time
+
+    from de.utils.timeutils import get_str_date_before_from_ts
+    from dotenv import load_dotenv
+    from fredapi import Fred
+
+    load_dotenv("/tmp/fred.env")
+
     logger = logging.getLogger(__name__)
 
     fred_api_key = os.getenv("FRED_API_KEY")

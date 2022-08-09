@@ -36,10 +36,10 @@ services:
   
   init:
     build:
-      context: ./docker/airflow-data
+      context: ./docker/airflow-base
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: instork/airflow-data
+    image: instork/airflow-init
     depends_on:
       - postgres
     environment: *airflow_environment
@@ -50,10 +50,10 @@ services:
   
   webserver:
     build:
-      context: ./docker/airflow-data
+      context: ./docker/airflow-base
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: instork/airflow-data
+    image: instork/airflow-webserver
     restart: always
     depends_on:
       - postgres
@@ -66,10 +66,10 @@ services:
 
   scheduler:
     build:
-      context: ./docker/airflow-pymongo
+      context: ./docker/airflow-de-local
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
-    image: instork/airflow-pymongo
+    image: instork/airflow-scheduler
     restart: always
     depends_on:
       - postgres

@@ -1,21 +1,14 @@
-import json
-import logging
-import os
-from typing import Dict, List
-
-from airflow.decorators import task
-from dotenv import load_dotenv
-from pymongo import MongoClient
-from utils.timeutils import get_datetime_from_ts, json_strptime, UTC
-
-load_dotenv("/tmp/mongo.env")
-
-# turn this on when test is done
-INDEX_UNIQUE = True
+INDEX_UNIQUE = False
 
 
 def _get_mongo_client():
     """Get mongo client."""
+    import os
+
+    from dotenv import load_dotenv
+    from pymongo import MongoClient
+
+    load_dotenv("/tmp/mongo.env")
     user = os.getenv("MONGODB_USER")
     pwd = os.getenv("MONGODB_PWD")
     host = os.getenv("MONGODB_HOST")
@@ -23,8 +16,22 @@ def _get_mongo_client():
     client = MongoClient(f"mongodb://{user}:{pwd}@{host}:{port}")
     return client
 
+## for exercise_fred2db-decorator.py
+# def get_mongo_client():
+#     """Get mongo client."""
+#     user = os.getenv("MONGODB_USER")
+#     pwd = os.getenv("MONGODB_PWD")
+#     host = os.getenv("MONGODB_HOST")
+#     port = os.getenv("MONGODB_PORT")
+#     client = MongoClient(f"mongodb://{user}:{pwd}@{host}:{port}")
+#     return client
+
 
 def insert_ohlcvs(templates_dict, **context):
+    import logging
+
+    from de.utils.timeutils import UTC, get_datetime_from_ts, json_strptime
+
     logger = logging.getLogger(__name__)
     # 이미 UTC로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
     start_time = templates_dict["start_time"]
@@ -60,6 +67,10 @@ def insert_ohlcvs(templates_dict, **context):
 
 
 def insert_single(templates_dict, **context):
+    import logging
+
+    from de.utils.timeutils import get_datetime_from_ts
+
     logger = logging.getLogger(__name__)
     start_time = templates_dict["start_time"]
     db_name = templates_dict["db_name"]

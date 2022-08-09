@@ -1,11 +1,10 @@
-import random
 import datetime as dt
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from fred.request import fetch_fred
-from mongodb.data2mongo import insert_single
-from utils.timeutils import ETZ
+from de.fred.request import fetch_fred
+from de.mongodb.data2mongo import insert_single
+from de.utils.timeutils import ETZ
 
 ########################### Set Configs ###########################
 SCHEDULE_INTERVAL = "0 0 * * *"  # At 00:00
@@ -51,4 +50,3 @@ insert_fred_task = PythonOperator(
 )
 
 fetch_fred_task >> insert_fred_task
-

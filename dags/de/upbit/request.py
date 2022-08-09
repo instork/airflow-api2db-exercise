@@ -5,7 +5,7 @@ import time
 from typing import Dict, List
 
 import requests
-from utils.timeutils import str2pend_datetime
+from de.utils.timeutils import str2pend_datetime
 
 
 def _get_minutes_ohlcvs(
