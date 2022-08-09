@@ -1,11 +1,10 @@
-
 def fetch_news(templates_dict, **context):
     import logging
     import random
     import time
 
-    from GoogleNews import GoogleNews
     from de.utils.timeutils import get_str_date_before_from_ts
+    from GoogleNews import GoogleNews
 
     logger = logging.getLogger(__name__)
 
