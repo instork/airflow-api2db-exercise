@@ -11,6 +11,7 @@ def fetch_news(templates_dict, **context):
     queries = templates_dict["queries"]
     start_time = templates_dict["start_time"]
     #  mm/dd/yyyy
+    logger.info(start_time)
     start_date = get_str_date_before_from_ts(start_time, "%m/%d/%Y")
 
     results = {k: [] for k in queries.keys()}

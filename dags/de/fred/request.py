@@ -11,12 +11,12 @@ def fetch_fred(templates_dict, **context):
     load_dotenv("/tmp/fred.env")
 
     logger = logging.getLogger(__name__)
-
     fred_api_key = os.getenv("FRED_API_KEY")
     fred = Fred(api_key=fred_api_key)
 
     fred_series_tickers = templates_dict["fred_series_tickers"]
     start_time = templates_dict["start_time"]
+    logger.info(start_time)
     start_date = get_str_date_before_from_ts(start_time, date_format="%Y-%m-%d")
 
     fred_data = {}

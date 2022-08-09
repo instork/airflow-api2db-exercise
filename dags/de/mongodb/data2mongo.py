@@ -37,6 +37,9 @@ def insert_ohlcvs(templates_dict, **context):
     start_time = templates_dict["start_time"]
     db_name = templates_dict["db_name"]
     utc_time = get_datetime_from_ts(start_time, get_day_before=False, tz=UTC)
+    
+    logger.info(start_time)
+    logger.info(utc_time)
 
     prev_task_id = next(iter(context["task"].upstream_task_ids))
     json_dicts = context["task_instance"].xcom_pull(task_ids=prev_task_id)
@@ -76,6 +79,9 @@ def insert_single(templates_dict, **context):
     db_name = templates_dict["db_name"]
     collection_name = templates_dict["collection_name"]
     etz_time = get_datetime_from_ts(start_time, get_day_before=True)
+
+    logger.info(start_time)
+    logger.info(etz_time)
 
     prev_task_id = next(iter(context["task"].upstream_task_ids))
     single_dict = context["task_instance"].xcom_pull(task_ids=prev_task_id)

@@ -13,14 +13,14 @@ SCHEDULE_INTERVAL = "0 0 * * *"  # At 00:00
 news_mongo_templates_dict = {
     "db_name": "test_db",
     "collection_name": "news",
-    "start_time": "{{ ts_nodash }}",
+    "start_time": "{{ data_interval_end }}",
 }
 ## Google
 queries = {
     "BTC-News": ["BTC", "bitcoin", "bitcoin will"],
     "ETH-News": ["ETH", "ethereum", "ethereum will"],
 }
-news_templates_dict = {"queries": queries, "start_time": "{{ ts_nodash }}"}
+news_templates_dict = {"queries": queries, "start_time": "{{ data_interval_end }}"}
 ################################################################
 
 dag = DAG(

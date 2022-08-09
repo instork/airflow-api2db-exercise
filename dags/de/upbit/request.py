@@ -5,7 +5,7 @@ import time
 from typing import Dict, List
 
 import requests
-from de.utils.timeutils import str2pend_datetime
+
 
 
 def _get_minutes_ohlcvs(
@@ -28,14 +28,16 @@ def _get_minutes_ohlcvs(
 
 def fetch_minute_ohlcvs(templates_dict, **context):
     """Get ohlcvs and save."""
+    import pendulum
     logger = logging.getLogger(__name__)
     minute_interval = templates_dict["minute_interval"]
     get_cnt = templates_dict["get_cnt"]
     coin_ticker = templates_dict["coin_ticker"]
-
-    # 이미 UTC로 변환됨, 20220601T040000 <- dt.datetime(2022, 6, 1, 0, 0, tzinfo=ETZ)
+    
+    # 이미 UTC로 변환됨, 2020-01-02T05:00:00+00:00
     start_time = templates_dict["start_time"]
-    start_time = str2pend_datetime(start_time, "YYYYMMDDTHHmmss", "UTC")
+    logger.info(start_time)
+    start_time = pendulum.from_format(start_time, "YYYY-MM-DDTHH:mm:ssZ") 
     start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
 
     ohlcvs = _get_minutes_ohlcvs(minute_interval, coin_ticker, start_time, get_cnt)

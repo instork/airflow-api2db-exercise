@@ -9,14 +9,14 @@ from de.utils.timeutils import UTC
 ########################### Set Configs ###########################
 SCHEDULE_INTERVAL = "0 * * * *"  # every hour
 ## mongodb
-mongo_templates_dict = {"db_name": "test_db", "start_time": "{{ ts_nodash }}"}
+mongo_templates_dict = {"db_name": "test_db", "start_time": "{{ data_interval_end }}"}
 ## upbit
 MINUTE_INTERVAL = 60
 GET_CNT = 1
 fetch_base_template_dict = {
     "minute_interval": MINUTE_INTERVAL,
     "get_cnt": GET_CNT,
-    "start_time": "{{ ts_nodash }}",
+    "start_time": "{{ data_interval_end }}",
 }
 tickers = ["USDT-BTC", "USDT-ETH"]
 fetch_template_dicts = {}

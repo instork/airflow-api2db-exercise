@@ -66,7 +66,7 @@ services:
 
   scheduler:
     build:
-      context: ./docker/airflow-de-local
+      context: ./docker/airflow-scheduler-local
       args:
         AIRFLOW_BASE_IMAGE: *airflow_image
     image: instork/airflow-scheduler

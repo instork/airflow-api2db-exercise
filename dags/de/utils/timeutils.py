@@ -9,12 +9,6 @@ ETZ = pendulum.timezone("US/Eastern")  # EST/EDT
 UTC = pendulum.timezone("UTC")
 
 
-def str2pend_datetime(start_time: str, format: str, tz_code="UTC"):
-    """string to pendulum datetime."""
-    start_time = pendulum.from_format(start_time, format, tz=pendulum.timezone(tz_code))
-    return start_time
-
-
 def str2datetime(s: str, format: str):
     """string to datetime."""
     return dt.datetime.strptime(s, format)
@@ -44,9 +38,11 @@ def get_str_date_before_from_ts(
 ) -> str:
     """
     Get string datetime from ts(start_time). start time automatically converted to UCT.
-    Chagege to tz(ETZ, default) and returns to string date_format
+    Chagege to tz(ETZ, default) and returns to string date_format.
+    Using on de/fred/request.py , de/googlenews/request.py
     """
-    start_time = str2pend_datetime(ts, "YYYYMMDDTHHmmss", "UCT")
+    # https://github.com/sdispater/pendulum/blob/master/docs/docs/string_formatting.md
+    start_time = pendulum.from_format(ts, "YYYY-MM-DDTHH:mm:ssZ") 
     etz_time = tz.convert(start_time).subtract(minutes=1)  # to get data day before
     start_date = etz_time.strftime(date_format)
     return start_date
@@ -57,8 +53,9 @@ def get_datetime_from_ts(
 ) -> dt.datetime:
     """
     Get dt.datetime form ts(start_time).
+    Using on data2mongo.py
     """
-    start_time = str2pend_datetime(ts, "YYYYMMDDTHHmmss", "UCT")
+    start_time = pendulum.from_format(ts, "YYYY-MM-DDTHH:mm:ssZ") 
     etz_time = tz.convert(start_time)
     if get_day_before:
         etz_time = etz_time.subtract(minutes=1)
