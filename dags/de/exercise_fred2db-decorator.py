@@ -1,5 +1,6 @@
 import datetime as dt
 
+
 from airflow.decorators import dag, task
 from de.utils.timeutils import ETZ
 
@@ -87,7 +88,7 @@ def fred2db():
         import logging
 
         from de.utils.timeutils import get_datetime_from_ts
-        from mongodb import get_mongo_client
+        from de.mongodb.data2mongo import get_mongo_client
 
         logger = logging.getLogger(__name__)
 
