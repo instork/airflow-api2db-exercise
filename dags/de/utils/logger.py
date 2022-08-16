@@ -13,7 +13,7 @@ MORE = 19
 DETAIL = 18
 
 # logger
-getLogger = logging.getLogger
+get_logger = logging.getLogger
 app_name = AppInfo().app_name()  # 현재 실행되는 모듈의 app_name 추출
 
 # log level 추가

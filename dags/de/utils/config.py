@@ -25,7 +25,7 @@ app_prop_file = os.path.join(prop_dir, "app_properties.yaml")
 # app_name.log file 에 logging
 log_dir = os.path.join(base_dir, "logs")
 log_file = os.path.join(log_dir, f"{app_name}.log")
-logger = create_logger(log_file)  # 향후 적용 예정
+logger = create_logger(log_file)
 
 # 현재 환경 정보 setting -> 실행 환경: dev(개발환경), test(테스트환경), prod(운영환경)
 EXECUTE_ENV = os.getenv("EXECUTE_ENV", "prod")  # 실행 환경: dev(개발환경), test(테스트환경), prod(운영환경)
