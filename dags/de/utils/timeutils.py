@@ -16,9 +16,13 @@ def str2datetime(s: str, format: str):
 
 def json_strptime(
     json_dicts: List[Dict],
-    dict_keys: List[str] = ["candle_date_time_utc", "candle_date_time_kst"],
+    dict_keys: List[str] = None,
 ):
     """dictionary's string datetime to datetime datetime."""
+
+    if dict_keys is None:
+        dict_keys = ["candle_date_time_utc", "candle_date_time_kst"]
+
     for key in dict_keys:
         for data in json_dicts:
             new_time = str2datetime(data[key], "%Y-%m-%dT%H:%M:%S")
