@@ -1,0 +1,16 @@
+# app_properties.yaml
+# app 실행에 필요한 다양한 property 정보 setting.
+
+# logging level(error(40), warning(30), info(20), more(19), detail(18), debug(10))
+logging_level: info
+time_zone: Asia/Seoul
+
+# 실행 환경. dev, test, prod 중 하나 선택
+execute_env: test
+
+# mongo_db
+mongodb_env_dir: /tmp/mongo.env
+mongodb_name: test_db
+
+# CryptoCompare dag param
+crpcomp_schedule_interval: 0 * * * *

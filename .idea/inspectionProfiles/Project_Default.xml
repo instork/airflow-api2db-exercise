@@ -15,6 +15,7 @@
         <list>
           <option value="sys._getframe" />
           <option value="logging.Logger.logc" />
+          <option value="logging.getLogger.logc" />
         </list>
       </option>
     </inspection_tool>

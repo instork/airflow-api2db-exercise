@@ -11,7 +11,7 @@ docker/airflow-pymongo/*.env
 
 /data/mongodb/*
 !data/**/.gitkeep
-
+/dags/logs
 
 
 # User-specific stuff

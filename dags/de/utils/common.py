@@ -32,7 +32,7 @@ class AppInfo:
         elif sys.argv[0].endswith("pytest"):
             return self.current_dir()
         else:
-            return os.path.abspath(os.path.dirname(sys.argv[0]))
+            return os.getcwd()
 
     @staticmethod
     def app_full_name(app_full_name=None):

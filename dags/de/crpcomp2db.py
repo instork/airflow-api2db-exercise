@@ -6,11 +6,13 @@ from de.mongodb.crpcomp2mongo import insert_ohlcvs
 from de.crypcomp.request import fetch_hour_ohlcvs
 from de.utils.timeutils import UTC
 
+from de.utils.config import config
+
 ########################### Set Configs ###########################
-SCHEDULE_INTERVAL = "0 * * * *"  # every hour
+SCHEDULE_INTERVAL = config.APP_PROPERTIES.crpcomp_schedule_interval  # every hour
 
 ## mongodb
-mongo_templates_dict = {"db_name": "test_db",
+mongo_templates_dict = {"db_name": config.APP_PROPERTIES.mongodb_name,
                         "start_time": "{{ data_interval_end }}"}
 GET_CNT = 1
 

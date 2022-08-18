@@ -1,0 +1,8 @@
+# conn_properties.yaml
+# db connection 실행에 필요한 다양한 property 정보 setting.
+
+# mongodb property -> local test 시, connection 정보 입력 하면 됨.
+mongodb_user:
+mongodb_pwd:
+mongodb_host:
+mongodb_port:

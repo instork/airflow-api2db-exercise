@@ -1,11 +1,13 @@
 import os
-import sys
 from argparse import ArgumentParser
 
-from de.utils.io import read_file, read_yaml
+from de.utils.io import read_file
 from de.utils.common import AppInfo, host_name, MultiDictContainer
 from de.utils.logger import create_logger, INFO, MORE, DETAIL, WARNING, ERROR, set_logging_level
 
+from dotenv import load_dotenv
+
+os.chdir("/opt/airflow/dags")  # 향후 처리 필요
 app_info = AppInfo(app_dir=os.getcwd())
 
 base_dir = app_info.app_dir()
@@ -60,33 +62,35 @@ def _extend_args_conf(args_parser: ArgumentParser, args_conf):
 class DefaultConfig(object):
     logger.log(INFO, "load default config ")
 
-    # db connection 기본 설정 가져오기
-    __ALL_CONN_INFO_TMP = read_yaml(path=default_conn_prop_file)
-
-    # 사용자 설정 가져오기
-    __ALL_CONN_INFO_TMP.merge(read_yaml(conn_prop_file))
-
-    ALL_CONN_INFO = __ALL_CONN_INFO_TMP['instork_conn_infos']
-    logger.logc(DETAIL, f"ALL_CONN_INFO --> {repr(ALL_CONN_INFO)}")
-
     # app 설정 파일 로딩
-    APP_PROPERTIES = load_yaml(default_app_prop_file)
-    APP_PROPERTIES.merge(app_prop_file)
+    APP_PROPERTIES = load_yaml(default_app_prop_file)  # - 기본 설정 가져오기
+    APP_PROPERTIES.merge(app_prop_file)                # - 사용자 설정 가져오기
 
-    # pytest 실행시, input_args_parser 미실행
-    if sys.argv[0].endswith("pytest"):
-        ARGS = MultiDictContainer({})
+    # conn 설정 파일 로딩
+    CONN_PROPERTIES = load_yaml(default_conn_prop_file)  # - 기본 설정 가져오기
+    CONN_PROPERTIES.merge(load_yaml(conn_prop_file))     # - 사용자 설정 가져오기
+
+    logger.logc(DETAIL, f"CONN_PROPERTIES --> {repr(CONN_PROPERTIES)}")
+
+    # db connection 설정
+    load_dotenv(APP_PROPERTIES.mongodb_env_dir)
+    CONN_PROPERTIES.mongodb_user = os.getenv("MONGODB_USER") if os.getenv("MONGODB_USER") \
+        else CONN_PROPERTIES.mongodb_user
+    CONN_PROPERTIES.mongodb_pwd = os.getenv("MONGODB_PWD") if os.getenv("MONGODB_PWD") \
+        else CONN_PROPERTIES.mongodb_pwd
+    CONN_PROPERTIES.mongodb_host = os.getenv("MONGODB_HOST") if os.getenv("MONGODB_HOST") \
+        else CONN_PROPERTIES.mongodb_host
+    CONN_PROPERTIES.mongodb_port = os.getenv("MONGODB_PORT") if os.getenv("MONGODB_PORT") \
+        else CONN_PROPERTIES.mongodb_port
 
     set_logging_level(logging_level=APP_PROPERTIES.logging_level)
-
-    logger.logc(MORE, f"conn properties --> {ALL_CONN_INFO}")
     logger.logc(MORE, f"app properties -->  {APP_PROPERTIES}")
+    logger.logc(MORE, f"conn properties --> {CONN_PROPERTIES}")
+
 
 # 향후 개발, 테스트, 운영 환경별 다르게 셋팅이 추가 필요한 경우, class 에 선언!
-
 class DevelopmentConfig(DefaultConfig):
     pass
-
 
 class TestingConfig(DefaultConfig):
     pass
